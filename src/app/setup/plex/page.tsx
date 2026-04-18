@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/auth/guards';
 import { getPlexBaseUrl, getPlexServerName, isPlexConfigured } from '@/plex/config';
+import { env } from '@/lib/env';
 import { PlexSetupClient } from './PlexSetupClient';
 
 export const dynamic = 'force-dynamic';
@@ -78,6 +79,7 @@ export default async function PlexSetupPage({ searchParams }: SetupPageProps) {
           configured={configured}
           serverName={serverName}
           serverUrl={serverUrl}
+          plexClientId={env.PLEX_CLIENT_IDENTIFIER}
         />
       </div>
     </div>

@@ -7,9 +7,16 @@ interface PlexSetupClientProps {
   configured: boolean;
   serverName: string | null;
   serverUrl: string | null;
+  plexClientId: string;
 }
 
-export function PlexSetupClient({ csrf, configured, serverName, serverUrl }: PlexSetupClientProps) {
+export function PlexSetupClient({
+  csrf,
+  configured,
+  serverName,
+  serverUrl,
+  plexClientId,
+}: PlexSetupClientProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,16 +24,39 @@ export function PlexSetupClient({ csrf, configured, serverName, serverUrl }: Ple
     setBusy(true);
     setError(null);
     try {
+      // Create the PIN from the browser so plex.tv sees the user's IP,
+      // not the server's datacenter IP (which triggers a security alert).
+      const pinRes = await fetch('https://plex.tv/api/v2/pins', {
+        method: 'POST',
+        headers: {
+          strong: 'true',
+          'X-Plex-Product': 'airplex',
+          'X-Plex-Client-Identifier': plexClientId,
+          Accept: 'application/json',
+          'Content-Length': '0',
+        },
+      });
+      if (!pinRes.ok) throw new Error(`plex.tv PIN creation failed: ${pinRes.status}`);
+      const pin = (await pinRes.json()) as { id: number; code: string };
+
+      // Store the pin on the server so the callback can poll it.
       const r = await fetch('/api/setup/plex/start', {
         method: 'POST',
-        headers: { 'x-airplex-csrf': csrf },
+        headers: { 'x-airplex-csrf': csrf, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinId: pin.id, pinCode: pin.code }),
       });
       if (!r.ok) {
         const json = (await r.json().catch(() => ({}))) as { error?: string };
         throw new Error(json.error ?? `HTTP ${r.status}`);
       }
-      const data = (await r.json()) as { authUrl: string };
-      window.location.href = data.authUrl;
+
+      const params = [
+        `clientID=${encodeURIComponent(plexClientId)}`,
+        `code=${encodeURIComponent(pin.code)}`,
+        `context[device][product]=airplex`,
+        `forwardUrl=${encodeURIComponent(window.location.origin + '/api/setup/plex/callback')}`,
+      ].join('&');
+      window.location.href = `https://app.plex.tv/auth#?${params}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start Plex sign-in.');
       setBusy(false);
