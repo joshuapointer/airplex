@@ -1,14 +1,22 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/auth/guards';
 import { CsrfProvider } from '@/components/dashboard/CsrfContext';
+import { isPlexConfigured } from '@/plex/config';
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   // requireAdmin() throws a redirect Response if not authenticated.
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') ?? '/dashboard';
   const session = await requireAdmin(pathname);
+
+  // If the admin hasn't linked a Plex account/server yet, force them through
+  // the /setup/plex flow before they can use the dashboard.
+  if (!isPlexConfigured()) {
+    redirect('/setup/plex');
+  }
 
   return (
     <CsrfProvider csrf={session.csrf}>

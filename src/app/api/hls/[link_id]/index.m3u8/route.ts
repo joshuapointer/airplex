@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { requireShareAccess } from '@/auth/guards';
 import { buildStartUrl } from '@/plex/transcode';
 import { plexFetch, PlexError } from '@/plex/client';
+import { getPlexBaseUrl } from '@/plex/config';
 import { rewriteManifest } from '@/plex/hls-rewriter';
 import { logEvent } from '@/db/queries/events';
-import { env } from '@/lib/env';
 import { logger } from '@/lib/logger';
 import type { ShareRow } from '@/types/share';
 
@@ -53,11 +53,16 @@ export async function GET(
     return NextResponse.json({ error: 'plex_error', status: response.status }, { status: 502 });
   }
 
+  const plexBaseUrl = getPlexBaseUrl();
+  if (!plexBaseUrl) {
+    return NextResponse.json({ error: 'plex_not_configured' }, { status: 503 });
+  }
+
   const text = await response.text();
   const { manifest } = rewriteManifest({
     manifest: text,
     linkId: row.id,
-    plexBaseUrl: env.PLEX_BASE_URL,
+    plexBaseUrl,
   });
 
   // play events are logged here for analytics (HLS session start).

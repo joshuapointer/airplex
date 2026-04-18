@@ -1,10 +1,13 @@
 // src/plex/client.ts
 //
-// Plex HTTP client. Owns the ONLY read of env.PLEX_TOKEN outside env.ts
-// (see plan §F item 5). Injects auth headers on every outgoing request.
-// Never logs the token, never includes it in the URL.
+// Plex HTTP client. Token and base URL are sourced from the runtime
+// configuration layer (`@/plex/config`), which reads from the `settings`
+// table populated by the /setup/plex PIN OAuth flow and falls back to env
+// for compose-based deployments. Injects auth headers on every outgoing
+// request; never logs the token, never includes it in the URL.
 
 import { env } from '@/lib/env';
+import { getPlexBaseUrl, getPlexToken } from '@/plex/config';
 import { logger } from '@/lib/logger';
 
 export interface PlexRequestOptions {
@@ -33,8 +36,7 @@ export class PlexError extends Error {
   }
 }
 
-function buildUrl(path: string, query?: Record<string, string | number>): string {
-  const base = env.PLEX_BASE_URL;
+function buildUrl(base: string, path: string, query?: Record<string, string | number>): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const url = new URL(`${base}${normalizedPath}`);
   if (query) {
@@ -48,10 +50,17 @@ function buildUrl(path: string, query?: Record<string, string | number>): string
 export async function plexFetch(opts: PlexRequestOptions): Promise<Response> {
   const method = opts.method ?? 'GET';
   const acceptKey: NonNullable<PlexRequestOptions['accept']> = opts.accept ?? 'json';
-  const url = buildUrl(opts.path, opts.query);
+
+  const token = getPlexToken();
+  const baseUrl = getPlexBaseUrl();
+  if (!token || !baseUrl) {
+    throw new PlexError(503, opts.path, 'Plex not configured — complete setup at /setup/plex');
+  }
+
+  const url = buildUrl(baseUrl, opts.path, opts.query);
 
   const headers: Record<string, string> = {
-    'X-Plex-Token': env.PLEX_TOKEN,
+    'X-Plex-Token': token,
     'X-Plex-Client-Identifier': env.PLEX_CLIENT_IDENTIFIER,
     Accept: ACCEPT_HEADERS[acceptKey],
   };

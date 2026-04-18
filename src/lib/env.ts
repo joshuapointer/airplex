@@ -53,11 +53,19 @@ const schema = z
       .string()
       .regex(/^file:/, 'DATABASE_URL must be a file: URI (SQLite only for MVP)'),
 
+    // PLEX_BASE_URL / PLEX_TOKEN are optional: the admin can complete the
+    // PIN-based OAuth setup at /setup/plex, which persists the values in the
+    // `settings` table. Env values act as a fallback for compose-based
+    // deployments. When present, PLEX_BASE_URL must still be a valid URL.
     PLEX_BASE_URL: z
       .string()
-      .url('PLEX_BASE_URL must be a valid URL')
-      .transform((v) => v.replace(/\/$/, '')),
-    PLEX_TOKEN: z.string().min(1, 'PLEX_TOKEN is required'),
+      .optional()
+      .default('')
+      .transform((v) => v.replace(/\/$/, ''))
+      .refine((v) => v === '' || /^https?:\/\//.test(v), {
+        message: 'PLEX_BASE_URL must be a valid http(s) URL when set',
+      }),
+    PLEX_TOKEN: z.string().optional().default(''),
     PLEX_CLIENT_IDENTIFIER: z.string().min(1, 'PLEX_CLIENT_IDENTIFIER is required'),
 
     SESSION_SECRET: secret32('SESSION_SECRET'),

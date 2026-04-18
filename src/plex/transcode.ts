@@ -7,12 +7,21 @@
 
 import { env } from '@/lib/env';
 import { logger } from '@/lib/logger';
-import { plexFetch } from './client';
+import { plexFetch, PlexError } from './client';
+import { getPlexBaseUrl } from './config';
 import type { PlexTranscodeStartParams } from '@/types/plex';
 
 export function buildStartUrl(params: PlexTranscodeStartParams): string {
   const { ratingKey, linkId, maxVideoBitrate } = params;
-  const url = new URL(`${env.PLEX_BASE_URL}/video/:/transcode/universal/start.m3u8`);
+  const base = getPlexBaseUrl();
+  if (!base) {
+    throw new PlexError(
+      503,
+      '/video/:/transcode/universal/start.m3u8',
+      'Plex not configured — complete setup at /setup/plex',
+    );
+  }
+  const url = new URL(`${base}/video/:/transcode/universal/start.m3u8`);
   const q = url.searchParams;
   q.set('path', `/library/metadata/${ratingKey}`);
   q.set('mediaIndex', '0');
