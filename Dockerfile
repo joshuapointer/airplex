@@ -55,7 +55,7 @@ ENV SESSION_SECRET=$SESSION_SECRET \
     OIDC_CLIENT_ID=$OIDC_CLIENT_ID \
     OIDC_CLIENT_SECRET=$OIDC_CLIENT_SECRET
 
-RUN npm run build
+RUN npm run build && mkdir -p ./public
 
 # ---------------------------------------------------------------------------
 # Stage: runtime
