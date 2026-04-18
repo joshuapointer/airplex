@@ -1,0 +1,71 @@
+@import 'neopointer-ui/styles.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --np-fg: var(--np-text);
+  --np-muted: var(--np-text-muted);
+  --np-font-display: 'Antonio', sans-serif;
+  --np-font-body: 'JetBrains Mono', monospace;
+  --np-radius-sharp: 2px;
+  --np-radius-soft: 6px;
+}
+
+html,
+body {
+  background: var(--np-bg);
+  color: var(--np-fg);
+  font-family: var(--np-font-body);
+}
+
+@layer components {
+  .glass {
+    background: var(--np-glass-bg, rgba(15, 15, 15, 0.75));
+    border: var(--np-glass-border, 1px solid rgba(255, 255, 255, 0.12));
+    backdrop-filter: blur(var(--np-glass-blur, 12px));
+    border-radius: var(--np-radius-soft);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--np-green);
+    color: var(--np-bg);
+    font-family: var(--np-font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.5rem 1rem;
+    border-radius: var(--np-radius-sharp);
+    border: 1px solid var(--np-green);
+    cursor: pointer;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--np-fg);
+    font-family: var(--np-font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.5rem 1rem;
+    border-radius: var(--np-radius-sharp);
+    border: 1px solid var(--np-border, rgba(255, 255, 255, 0.12));
+    cursor: pointer;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    font-family: var(--np-font-body);
+    font-size: 0.75rem;
+    border-radius: var(--np-radius-sharp);
+    border: 1px solid var(--np-border, rgba(255, 255, 255, 0.12));
+    color: var(--np-fg);
+  }
+}

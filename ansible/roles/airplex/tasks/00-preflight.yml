@@ -1,0 +1,37 @@
+---
+- name: Warn if OS is not a supported distribution
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: Unsupported distribution '{{ ansible_distribution }}'.
+      This role is tested on Debian, Ubuntu, and Arch Linux.
+  when: ansible_distribution not in ['Debian', 'Ubuntu', 'Archlinux']
+
+- name: Check that Docker is installed
+  ansible.builtin.command: docker --version
+  register: _docker_version
+  changed_when: false
+  failed_when: false
+
+- name: Fail with actionable message when Docker is missing
+  ansible.builtin.fail:
+    msg: >-
+      Docker is not installed or not on PATH.
+      Install Docker Engine first: https://docs.docker.com/engine/install/
+      Then re-run this playbook.
+  when: _docker_version.rc != 0
+
+- name: Get filesystem type of data dir parent
+  ansible.builtin.command: 'stat -f -c %T {{ airplex_data_dir | dirname }}'
+  register: _data_fstype
+  changed_when: false
+
+- name: Refuse NFS for data directory (SQLite + NFS = data corruption risk)
+  ansible.builtin.assert:
+    that:
+      - _data_fstype.stdout | trim not in ['nfs', 'nfs4']
+    fail_msg: >-
+      The parent directory of '{{ airplex_data_dir }}' is on an NFS mount
+      (detected fs type: '{{ _data_fstype.stdout | trim }}').
+      SQLite on NFS is unsafe due to advisory lock semantics.
+      Move airplex_data_dir to a local filesystem and retry.
+    success_msg: "Filesystem type '{{ _data_fstype.stdout | trim }}' is acceptable for SQLite."

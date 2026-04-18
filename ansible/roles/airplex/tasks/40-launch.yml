@@ -1,0 +1,7 @@
+---
+- name: Pull and start airplex containers
+  community.docker.docker_compose_v2:
+    project_src: '{{ airplex_install_dir }}'
+    state: present
+    pull: always
+  notify: restart airplex

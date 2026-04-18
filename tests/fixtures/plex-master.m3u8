@@ -1,0 +1,8 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=1280x720,CODECS="avc1.4d401f,mp4a.40.2"
+/video/:/transcode/universal/session/1234/hls/media0/index.m3u8?X-Plex-Token=MYTESTTOKEN
+#EXT-X-STREAM-INF:BANDWIDTH=4000000,RESOLUTION=1920x1080,CODECS="avc1.640028,mp4a.40.2"
+http://localhost:32400/video/:/transcode/universal/session/1234/hls/media1/index.m3u8?X-Plex-Token=MYTESTTOKEN
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360,CODECS="avc1.42c01e,mp4a.40.2"
+session/1234/hls/media2/index.m3u8?X-Plex-Token=MYTESTTOKEN

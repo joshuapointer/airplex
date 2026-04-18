@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    env:
+      SESSION_SECRET: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      DEVICE_LOCK_SECRET: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+      SHARE_TOKEN_SECRET: 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+      APP_URL: 'http://localhost:3000'
+      PLEX_BASE_URL: 'http://localhost:32400'
+      PLEX_TOKEN: 'dummy'
+      PLEX_CLIENT_IDENTIFIER: 'airplex-ci'
+      OIDC_ISSUER_URL: 'http://localhost:9999'
+      OIDC_CLIENT_ID: 'id'
+      OIDC_CLIENT_SECRET: 'secret'
+      DATABASE_URL: 'file::memory:'
+      NODE_ENV: 'test'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:unit
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      SESSION_SECRET: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      DEVICE_LOCK_SECRET: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+      SHARE_TOKEN_SECRET: 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+      APP_URL: 'http://localhost:3000'
+      PLEX_BASE_URL: 'http://localhost:32400'
+      PLEX_TOKEN: 'dummy'
+      PLEX_CLIENT_IDENTIFIER: 'airplex-ci'
+      OIDC_ISSUER_URL: 'http://localhost:9999'
+      OIDC_CLIENT_ID: 'id'
+      OIDC_CLIENT_SECRET: 'secret'
+      DATABASE_URL: 'file::memory:'
+      NODE_ENV: 'test'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build

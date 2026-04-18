@@ -1,0 +1,20 @@
+---
+- name: Preflight checks
+  ansible.builtin.import_tasks: 00-preflight.yml
+  tags: [airplex, preflight]
+
+- name: Create directories
+  ansible.builtin.import_tasks: 10-directories.yml
+  tags: [airplex, directories]
+
+- name: Materialize environment file
+  ansible.builtin.import_tasks: 20-env.yml
+  tags: [airplex, env]
+
+- name: Template docker-compose
+  ansible.builtin.import_tasks: 30-compose.yml
+  tags: [airplex, compose]
+
+- name: Pull and launch containers
+  ansible.builtin.import_tasks: 40-launch.yml
+  tags: [airplex, launch]

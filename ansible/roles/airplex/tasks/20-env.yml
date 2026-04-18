@@ -1,0 +1,26 @@
+---
+- name: Template .env from Ansible variables
+  ansible.builtin.template:
+    src: env.j2
+    dest: '{{ airplex_install_dir }}/.env'
+    owner: root
+    group: root
+    mode: '0600'
+  when: airplex_env_source == 'vars'
+  no_log: true
+
+- name: Assert pre-materialized env file exists (SOPS mode)
+  ansible.builtin.stat:
+    path: '{{ airplex_env_file }}'
+  register: _sops_env_stat
+  when: airplex_env_source == 'sops'
+
+- name: Fail if SOPS env file is missing
+  ansible.builtin.fail:
+    msg: >-
+      airplex_env_source is 'sops' but the env file '{{ airplex_env_file }}' does not exist on
+      the host. Ensure your secrets role (e.g. roles/04-secrets) has materialised it before
+      running this role.
+  when:
+    - airplex_env_source == 'sops'
+    - not _sops_env_stat.stat.exists

@@ -1,0 +1,15 @@
+services:
+  airplex:
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.airplex.rule=Host(`${APP_URL#https://}`)'
+      - 'traefik.http.routers.airplex.entrypoints=websecure'
+      - 'traefik.http.routers.airplex.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.airplex.loadbalancer.server.port=3000'
+    networks:
+      - jarch-public
+    ports: []
+
+networks:
+  jarch-public:
+    external: true

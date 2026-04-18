@@ -1,0 +1,15 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:4
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-MAP:URI="/video/:/transcode/universal/session/1234/hls/media0/init.mp4?X-Plex-Token=MYTESTTOKEN"
+#EXTINF:4.000000,
+/video/:/transcode/universal/session/1234/hls/media0/seg0.ts?X-Plex-Token=MYTESTTOKEN
+#EXTINF:4.000000,
+/video/:/transcode/universal/session/1234/hls/media0/seg1.ts?X-Plex-Token=MYTESTTOKEN
+#EXTINF:4.000000,
+http://localhost:32400/video/:/transcode/universal/session/1234/hls/media0/seg2.ts?X-Plex-Token=MYTESTTOKEN
+#EXTINF:3.200000,
+segment3.ts?X-Plex-Token=MYTESTTOKEN
+#EXT-X-KEY:METHOD=AES-128,URI="/video/:/transcode/universal/session/1234/hls/key0.bin?X-Plex-Token=MYTESTTOKEN",IV=0x00000000000000000000000000000000
+#EXT-X-ENDLIST

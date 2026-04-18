@@ -1,0 +1,7 @@
+---
+- name: Deploy airplex
+  hosts: airplex
+  become: true
+
+  roles:
+    - role: airplex

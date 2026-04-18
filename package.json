@@ -1,0 +1,47 @@
+{
+  "name": "airplex",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plex share-link service with device-lock and AirPlay-first playback",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "node .next/standalone/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint && prettier --check .",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "playwright test",
+    "gen-secrets": "tsx scripts/gen-secrets.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "hls.js": "^1.5.0",
+    "iron-session": "^8.0.0",
+    "nanoid": "^5.0.0",
+    "neopointer-ui": "0.1.0",
+    "next": "^15.0.0",
+    "openid-client": "^5.6.0",
+    "pino": "^9.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^15.0.0",
+    "@playwright/test": "^1.45.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^15.0.0",
+    "postcss": "^8.4.0",
+    "prettier": "^3.3.0",
+    "tailwindcss": "^3.4.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

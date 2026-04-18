@@ -1,0 +1,16 @@
+---
+- name: Create airplex install directory
+  ansible.builtin.file:
+    path: '{{ airplex_install_dir }}'
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create airplex data directory (owned by uid/gid 1000 — Docker node user)
+  ansible.builtin.file:
+    path: '{{ airplex_data_dir }}'
+    state: directory
+    owner: '1000'
+    group: '1000'
+    mode: '0755'

@@ -1,0 +1,20 @@
+services:
+  airplex:
+    build: .
+    # Alternatively, use a pre-built image:
+    # image: airplex:latest
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/data
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  default:
+    name: airplex_default

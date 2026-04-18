@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  role_name: airplex
+  author: airplex
+  description: Deploy the airplex Plex share gateway via Docker Compose
+  min_ansible_version: '2.14'
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Archlinux
+      versions:
+        - all
+
+dependencies: []

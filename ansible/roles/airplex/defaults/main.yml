@@ -1,0 +1,41 @@
+---
+# Container image — override with a specific tag in production
+airplex_image: 'ghcr.io/OWNER/airplex:latest'
+
+# Installation paths
+airplex_install_dir: '/opt/airplex'
+airplex_data_dir: '/opt/airplex/data'
+
+# Secret source: "vars" (template from variables below) or "sops" (pre-materialized env file)
+airplex_env_source: 'vars'
+
+# Path to the pre-materialized env file when airplex_env_source == "sops"
+airplex_env_file: '/run/secrets/airplex.env'
+
+# Docker network — set to "jarch-public" on jarch hosts to attach to Traefik
+airplex_docker_network: 'airplex_default'
+
+# Traefik / public exposure
+airplex_public_port: 3000
+airplex_domain: 'airplex.example.com'
+
+# -----------------------------------------------------------------------
+# Application env vars (used when airplex_env_source == "vars")
+# Override ALL of these in your host_vars / group_vars / -e flags.
+# -----------------------------------------------------------------------
+airplex_app_url: ''
+airplex_plex_base_url: ''
+airplex_plex_token: ''
+airplex_plex_client_identifier: 'airplex'
+airplex_session_secret: ''
+airplex_device_lock_secret: ''
+airplex_share_token_secret: ''
+airplex_oidc_issuer_url: ''
+airplex_oidc_client_id: ''
+airplex_oidc_client_secret: ''
+airplex_oidc_admin_groups: ''
+airplex_oidc_groups_claim: 'groups'
+airplex_share_default_ttl_hours: 48
+airplex_share_max_ttl_hours: 168
+airplex_log_level: 'info'
+airplex_trust_proxy: true

@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build artifacts
+dist/
+build/
+
+# Runtime data
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Not needed in image
+ansible/
+tests/
+.github/
+docs/
+.git/
+.gitignore
+.dockerignore
+README.md
+.omc/
