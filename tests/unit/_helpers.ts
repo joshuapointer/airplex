@@ -11,6 +11,8 @@ export function makeFakeShareRow(partial?: Partial<ShareRow>): ShareRow {
     plex_media_type: 'movie',
     recipient_label: 'Test User',
     recipient_note: null,
+    sender_label: null,
+    poster_path: null,
     created_at: NOW,
     expires_at: NOW + 86400,
     max_plays: null,

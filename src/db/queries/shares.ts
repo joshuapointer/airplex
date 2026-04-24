@@ -14,6 +14,8 @@ let _stmts: {
       string, // plex_media_type
       string, // recipient_label
       string | null, // recipient_note
+      string | null, // sender_label
+      string | null, // poster_path
       number, // created_at
       number, // expires_at
       number | null, // max_plays
@@ -41,10 +43,11 @@ function stmts() {
     insert: db.prepare(
       'INSERT INTO shares (\n' +
         '  id, token_hash, plex_rating_key, title, plex_media_type,\n' +
-        '  recipient_label, recipient_note, created_at, expires_at, max_plays,\n' +
+        '  recipient_label, recipient_note, sender_label, poster_path,\n' +
+        '  created_at, expires_at, max_plays,\n' +
         '  play_count, device_fingerprint_hash, device_locked_at, revoked_at,\n' +
         '  created_by_sub\n' +
-        ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        ') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     ),
     getById: db.prepare('SELECT * FROM shares WHERE id = ?'),
     getByTokenHash: db.prepare('SELECT * FROM shares WHERE token_hash = ?'),
@@ -85,6 +88,8 @@ export function insertShare(row: ShareRow): void {
     row.plex_media_type,
     row.recipient_label,
     row.recipient_note,
+    row.sender_label,
+    row.poster_path,
     row.created_at,
     row.expires_at,
     row.max_plays,

@@ -12,6 +12,8 @@ export interface ShareRow {
   plex_media_type: ShareMediaType;
   recipient_label: string;
   recipient_note: string | null;
+  sender_label: string | null;
+  poster_path: string | null;
   created_at: number; // unix seconds
   expires_at: number;
   max_plays: number | null;

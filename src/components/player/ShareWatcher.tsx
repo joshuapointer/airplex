@@ -269,6 +269,8 @@ function Player({
   const [resumeOffer, setResumeOffer] = useState<number | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [showAirplayHint, setShowAirplayHint] = useState(false);
+  const airplayHintFiredRef = useRef(false);
 
   const hlsUrl = useMemo(() => {
     const base = `/api/hls/${linkId}/index.m3u8`;
@@ -384,6 +386,12 @@ function Player({
     const onPlay = () => {
       setIsBuffering(false);
       startLoops();
+      // Fire the AirPlay hint once, after playback actually starts — avoids
+      // showing it while the recipient is still deciding to play.
+      if (!airplayHintFiredRef.current) {
+        airplayHintFiredRef.current = true;
+        setShowAirplayHint(true);
+      }
     };
     const onPause = () => {
       void saveProgress();
@@ -565,8 +573,8 @@ function Player({
         </div>
       ) : null}
 
-      {/* AirPlay hint — iOS Safari only */}
-      <AirplayHint />
+      {/* AirPlay hint — iOS Safari only, visible after first play event */}
+      <AirplayHint visible={showAirplayHint} />
     </div>
   );
 }

@@ -11,23 +11,30 @@ function isIosSafari(): boolean {
   return isIos && isSafari;
 }
 
-export function AirplayHint() {
-  const [visible, setVisible] = useState(false);
+export interface AirplayHintProps {
+  /**
+   * Controlled visibility — parent flips this true after the first `play`
+   * event so recipients don't see the hint while they're still deciding
+   * whether to start playback.
+   */
+  visible: boolean;
+}
+
+export function AirplayHint({ visible }: AirplayHintProps) {
   const [dismissed, setDismissed] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    if (!visible) return;
     if (!isIosSafari()) return;
-    // Show the hint briefly after play begins — give the user a moment to find
-    // the AirPlay button. Auto-dismiss after 8 seconds so it doesn't linger.
-    setVisible(true);
+    // Auto-dismiss 8s after becoming visible so the hint doesn't linger.
     timerRef.current = setTimeout(() => setDismissed(true), 8000);
     return () => {
       if (timerRef.current !== null) clearTimeout(timerRef.current);
     };
-  }, []);
+  }, [visible]);
 
-  if (!visible) return null;
+  if (!visible || !isIosSafari()) return null;
 
   return (
     <div className="flex justify-center mt-2">

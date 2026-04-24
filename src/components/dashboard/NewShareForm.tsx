@@ -29,6 +29,7 @@ export function NewShareForm() {
   // Details form state
   const [recipientLabel, setRecipientLabel] = useState('');
   const [recipientNote, setRecipientNote] = useState('');
+  const [senderLabel, setSenderLabel] = useState('');
   const [ttlHours, setTtlHours] = useState('48');
   const [maxPlays, setMaxPlays] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -64,11 +65,7 @@ export function NewShareForm() {
     setSubmitError(null);
 
     const mediaType: 'movie' | 'show' | 'episode' =
-      selectedItem.type === 'movie'
-        ? 'movie'
-        : selectedItem.type === 'show'
-          ? 'show'
-          : 'episode';
+      selectedItem.type === 'movie' ? 'movie' : selectedItem.type === 'show' ? 'show' : 'episode';
 
     const body: Record<string, unknown> = {
       ratingKey: selectedItem.ratingKey,
@@ -77,6 +74,7 @@ export function NewShareForm() {
       recipient_label: recipientLabel,
     };
     if (recipientNote.trim()) body.recipient_note = recipientNote.trim();
+    if (senderLabel.trim()) body.sender_label = senderLabel.trim();
     if (ttlHours) body.ttl_hours = Number(ttlHours);
     if (maxPlays.trim()) body.max_plays = Number(maxPlays);
 
@@ -214,6 +212,16 @@ export function NewShareForm() {
             />
           </Field>
 
+          <Field label="From (shown to recipient, optional)">
+            <input
+              maxLength={60}
+              value={senderLabel}
+              onChange={(e) => setSenderLabel(e.target.value)}
+              placeholder="e.g. Josh"
+              style={inputStyle}
+            />
+          </Field>
+
           <Field label="Note (optional)">
             <textarea
               value={recipientNote}
@@ -307,6 +315,7 @@ export function NewShareForm() {
               setSelectedItem(null);
               setRecipientLabel('');
               setRecipientNote('');
+              setSenderLabel('');
               setTtlHours('48');
               setMaxPlays('');
               setResult(null);

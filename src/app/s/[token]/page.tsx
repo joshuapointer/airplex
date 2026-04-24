@@ -206,14 +206,60 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   const boundClaim = claimAction.bind(null, token);
   const ttlLabel = formatTtl(ttlSeconds);
 
+  const posterSrc = row.poster_path ? `/api/share/${token}/poster` : null;
+
   return (
-    <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x flex flex-col">
-      <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-4 sm:px-6 py-10">
+    <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x flex flex-col relative overflow-hidden">
+      {/* Blurred backdrop — purely decorative, hidden from AT. */}
+      {posterSrc ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${posterSrc})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(40px) saturate(1.1)',
+            opacity: 0.25,
+            transform: 'scale(1.15)',
+          }}
+        />
+      ) : null}
+      <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-4 sm:px-6 py-10 relative">
         {/* Brand mark */}
         <header className="mb-8 flex items-center justify-between animate-enter">
           <p className="text-np-green font-mono text-xs uppercase tracking-widest">airplex</p>
           <span className="badge">share</span>
         </header>
+
+        {/* From line — sender identity */}
+        {row.sender_label ? (
+          <p className="text-np-cyan font-mono text-xs uppercase tracking-widest mb-3 animate-enter-delay-1">
+            From <span className="text-np-fg">{row.sender_label}</span>
+          </p>
+        ) : null}
+
+        {/* Poster thumbnail */}
+        {posterSrc ? (
+          <div className="mb-5 animate-enter-delay-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={posterSrc}
+              alt=""
+              width={120}
+              height={180}
+              loading="eager"
+              className="rounded-sharp"
+              style={{
+                width: '120px',
+                height: '180px',
+                objectFit: 'cover',
+                border: '1px solid var(--np-muted)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+              }}
+            />
+          </div>
+        ) : null}
 
         {/* Title */}
         <h1 className="font-display text-4xl sm:text-5xl uppercase tracking-wide mb-3 text-np-fg leading-tight animate-enter-delay-1">

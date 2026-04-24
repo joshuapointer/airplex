@@ -60,6 +60,25 @@ describe('db-queries: insertShare / getShareById', () => {
     expect(fetched.device_fingerprint_hash).toBeNull();
     expect(fetched.revoked_at).toBeNull();
   });
+
+  it('round-trips sender_label and poster_path (0006 migration)', () => {
+    const row = makeRow({
+      sender_label: 'Josh',
+      poster_path: '/library/metadata/12345/thumb/1234567890',
+    });
+    insertShare(row);
+    const fetched = getShareById(row.id)!;
+    expect(fetched.sender_label).toBe('Josh');
+    expect(fetched.poster_path).toBe('/library/metadata/12345/thumb/1234567890');
+  });
+
+  it('treats null sender_label / poster_path as NULL', () => {
+    const row = makeRow({ sender_label: null, poster_path: null });
+    insertShare(row);
+    const fetched = getShareById(row.id)!;
+    expect(fetched.sender_label).toBeNull();
+    expect(fetched.poster_path).toBeNull();
+  });
 });
 
 describe('db-queries: claimDevice atomicity', () => {

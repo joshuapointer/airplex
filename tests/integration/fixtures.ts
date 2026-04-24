@@ -26,7 +26,13 @@ export interface SeededShare {
 
 export async function seedShare(
   request: APIRequestContext,
-  init: { ratingKey?: string; title?: string; recipient_label?: string } = {},
+  init: {
+    ratingKey?: string;
+    title?: string;
+    recipient_label?: string;
+    sender_label?: string;
+    poster_path?: string;
+  } = {},
 ): Promise<SeededShare> {
   const res = await request.post('/api/test/_seed', {
     data: init,

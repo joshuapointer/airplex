@@ -7,6 +7,8 @@ import { env } from '@/lib/env';
 import { createShareToken } from '@/lib/share-token';
 import { insertShare, listShares } from '@/db/queries/shares';
 import { logEvent } from '@/db/queries/events';
+import { getMetadata } from '@/plex/metadata';
+import { logger } from '@/lib/logger';
 import type { ShareRow } from '@/types/share';
 
 /**
@@ -28,6 +30,7 @@ const createBody = z.object({
   mediaType: z.enum(['movie', 'episode', 'show']),
   recipient_label: z.string().min(1).max(120),
   recipient_note: z.string().max(2000).optional(),
+  sender_label: z.string().max(60).optional(),
   ttl_hours: z.coerce.number().int().min(1).max(env.SHARE_MAX_TTL_HOURS).optional(),
   max_plays: z.union([z.literal(null), z.coerce.number().int().positive()]).optional(),
 });
@@ -77,6 +80,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const id = nanoid(12);
   const { token, tokenHash } = createShareToken();
 
+  // Snapshot poster path from Plex at create time so the recipient sees
+  // artwork even if Plex is unreachable later. Non-fatal on failure — the
+  // recipient screen gracefully degrades to the text-only layout.
+  let posterPath: string | null = null;
+  try {
+    const meta = await getMetadata(body.ratingKey);
+    posterPath = meta.thumb ?? null;
+  } catch (err) {
+    logger.warn(
+      { err, ratingKey: body.ratingKey },
+      'failed to snapshot poster_path at share create — continuing',
+    );
+  }
+
+  const senderLabelTrimmed = body.sender_label?.trim();
+  const senderLabel = senderLabelTrimmed ? senderLabelTrimmed : null;
+
   const row: ShareRow = {
     id,
     token_hash: tokenHash,
@@ -85,6 +105,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     plex_media_type: body.mediaType,
     recipient_label: body.recipient_label,
     recipient_note: body.recipient_note ?? null,
+    sender_label: senderLabel,
+    poster_path: posterPath,
     created_at: now,
     expires_at: now + ttlHours * 3600,
     max_plays: body.max_plays ?? null,

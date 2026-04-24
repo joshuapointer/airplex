@@ -5,7 +5,7 @@
 // so Playwright specs can seed a share row directly into the DB without
 // going through the admin OIDC flow.
 //
-// POST body: { ratingKey?, title?, recipient_label? }
+// POST body: { ratingKey?, title?, recipient_label?, sender_label?, poster_path? }
 // Response:  { id, token, shareUrl }
 
 import { NextResponse } from 'next/server';
@@ -32,7 +32,13 @@ export async function POST(req: Request): Promise<NextResponse> {
   // path, migrations have not run yet.
   runMigrations();
 
-  let body: { ratingKey?: string; title?: string; recipient_label?: string };
+  let body: {
+    ratingKey?: string;
+    title?: string;
+    recipient_label?: string;
+    sender_label?: string;
+    poster_path?: string;
+  };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -42,6 +48,8 @@ export async function POST(req: Request): Promise<NextResponse> {
   const ratingKey = body.ratingKey ?? '12345';
   const title = body.title ?? 'Integration Test Movie';
   const recipientLabel = body.recipient_label ?? 'playwright';
+  const senderLabel = body.sender_label ?? null;
+  const posterPath = body.poster_path ?? null;
 
   const id = nanoid(12);
   const { token, tokenHash } = createShareToken();
@@ -55,6 +63,8 @@ export async function POST(req: Request): Promise<NextResponse> {
     plex_media_type: 'movie',
     recipient_label: recipientLabel,
     recipient_note: null,
+    sender_label: senderLabel,
+    poster_path: posterPath,
     created_at: now,
     expires_at: now + 3600, // 1 hour
     max_plays: null,
