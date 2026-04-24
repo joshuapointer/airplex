@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireShareAccess } from '@/auth/guards';
-import { decodeSegmentBlob } from '@/plex/hls-rewriter';
+import { decodeSegmentBlob, rewriteManifest } from '@/plex/hls-rewriter';
 import { plexFetch, PlexError } from '@/plex/client';
+import { getPlexBaseUrl } from '@/plex/config';
 import { logger } from '@/lib/logger';
 import type { ShareRow } from '@/types/share';
 
@@ -51,11 +52,50 @@ export async function GET(
     return new NextResponse(body, { status: response.status });
   }
 
+  const upstreamType = response.headers.get('content-type') ?? 'application/octet-stream';
+
+  // Nested m3u8 playlists inside a master playlist also contain URIs
+  // (segment .ts files, keys, etc.) that must be rewritten so they still
+  // route back through this proxy. Without this, the player requests
+  // `/api/hls/<id>/seg/00001.ts` literally and we 404 on decode.
+  if (upstreamType.includes('mpegurl') || originalPath.endsWith('.m3u8')) {
+    const plexBaseUrl = getPlexBaseUrl();
+    if (!plexBaseUrl) {
+      return NextResponse.json({ error: 'plex_not_configured' }, { status: 503 });
+    }
+    const text = await response.text();
+    // Nested playlists may contain purely relative URIs (e.g. `00001.ts`);
+    // the rewriter needs the containing directory to resolve them correctly.
+    const dir = originalPath.slice(0, originalPath.lastIndexOf('/') + 1);
+    const normalized = text
+      .split(/\r?\n/)
+      .map((line) => {
+        if (line.length === 0 || line.startsWith('#')) return line;
+        // Absolute already — rewriter handles.
+        if (/^https?:\/\//i.test(line) || line.startsWith('/')) return line;
+        return dir + line;
+      })
+      .join('\n');
+    const { manifest } = rewriteManifest({
+      manifest: normalized,
+      linkId: row.id,
+      plexBaseUrl,
+    });
+    return new NextResponse(manifest, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Cache-Control': 'private, max-age=1',
+        'Referrer-Policy': 'no-referrer',
+      },
+    });
+  }
+
   // Only forward Content-Length when Plex provides it; an empty string is
   // malformed (RFC 7230) and causes some HLS clients to treat the segment as
   // zero-length and stall playback.
   const responseHeaders: Record<string, string> = {
-    'Content-Type': response.headers.get('content-type') ?? 'application/octet-stream',
+    'Content-Type': upstreamType,
     'Referrer-Policy': 'no-referrer',
     'Cache-Control': 'private, max-age=60',
   };

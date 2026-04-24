@@ -25,7 +25,7 @@ function extractClientIp(req: NextRequest): string {
 const createBody = z.object({
   ratingKey: z.string().min(1).max(64),
   title: z.string().min(1).max(300),
-  mediaType: z.enum(['movie', 'episode']),
+  mediaType: z.enum(['movie', 'episode', 'show']),
   recipient_label: z.string().min(1).max(120),
   recipient_note: z.string().max(2000).optional(),
   ttl_hours: z.coerce.number().int().min(1).max(env.SHARE_MAX_TTL_HOURS).optional(),

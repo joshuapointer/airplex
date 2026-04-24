@@ -63,7 +63,12 @@ export function NewShareForm() {
     setSubmitting(true);
     setSubmitError(null);
 
-    const mediaType = selectedItem.type === 'movie' ? 'movie' : 'episode';
+    const mediaType: 'movie' | 'show' | 'episode' =
+      selectedItem.type === 'movie'
+        ? 'movie'
+        : selectedItem.type === 'show'
+          ? 'show'
+          : 'episode';
 
     const body: Record<string, unknown> = {
       ratingKey: selectedItem.ratingKey,

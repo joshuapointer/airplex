@@ -185,9 +185,21 @@
   },
   "hotPaths": [
     {
+      "path": "src/app/s/[token]/page.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1777004101677,
+      "type": "file"
+    },
+    {
       "path": "src/app/setup/plex/PlexSetupClient.tsx",
       "accessCount": 3,
       "lastAccessed": 1777001963425,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/hls/[link_id]/seg/[...path]/route.ts",
+      "accessCount": 3,
+      "lastAccessed": 1777003648422,
       "type": "file"
     },
     {
@@ -218,6 +230,30 @@
       "path": "src/middleware.ts",
       "accessCount": 2,
       "lastAccessed": 1776998987783,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/transcode.ts",
+      "accessCount": 2,
+      "lastAccessed": 1777003300684,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/hls/[link_id]/index.m3u8/route.ts",
+      "accessCount": 2,
+      "lastAccessed": 1777004019778,
+      "type": "file"
+    },
+    {
+      "path": "scripts/migrate-runtime.cjs",
+      "accessCount": 2,
+      "lastAccessed": 1777004389090,
+      "type": "file"
+    },
+    {
+      "path": "src/db/migrate.ts",
+      "accessCount": 2,
+      "lastAccessed": 1777004395114,
       "type": "file"
     },
     {
@@ -296,12 +332,6 @@
       "path": "src/plex/hls-rewriter.ts",
       "accessCount": 1,
       "lastAccessed": 1776997451941,
-      "type": "file"
-    },
-    {
-      "path": "src/db/migrate.ts",
-      "accessCount": 1,
-      "lastAccessed": 1776997452348,
       "type": "file"
     },
     {
@@ -389,12 +419,6 @@
       "type": "directory"
     },
     {
-      "path": "scripts/migrate-runtime.cjs",
-      "accessCount": 1,
-      "lastAccessed": 1776998658070,
-      "type": "file"
-    },
-    {
       "path": "src/app/dashboard/page.tsx",
       "accessCount": 1,
       "lastAccessed": 1776998691345,
@@ -440,6 +464,24 @@
       "path": "src/app/api/setup/plex/select/route.ts",
       "accessCount": 1,
       "lastAccessed": 1777002330489,
+      "type": "file"
+    },
+    {
+      "path": "src/db/queries/shares.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777002643138,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/client.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777003237241,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/metadata.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777003911481,
       "type": "file"
     }
   ],

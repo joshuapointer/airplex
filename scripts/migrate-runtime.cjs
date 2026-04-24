@@ -28,7 +28,12 @@ if (dbPath !== ':memory:') {
 
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+// Deliberately leave foreign_keys OFF during migrations so schema
+// reshuffles (DROP parent tables, rename-via-copy) don't trip the FK
+// guard. The application (src/db/client.ts) re-enables foreign_keys=ON
+// for the normal request path.
+db.pragma('foreign_keys = OFF');
+db.pragma('legacy_alter_table = ON');
 db.pragma('synchronous = NORMAL');
 
 db.exec(

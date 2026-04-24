@@ -19,6 +19,11 @@ export interface PlexMetadata {
   parentTitle?: string;
   grandparentTitle?: string;
   duration?: number;
+  index?: number;
+  summary?: string;
+  thumb?: string;
+  art?: string;
+  leafCount?: number;
   Media?: { Part?: { file: string; key: string }[] }[];
 }
 

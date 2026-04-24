@@ -16,6 +16,12 @@ const MIGRATIONS_DIR = path.resolve(process.cwd(), 'src/db/migrations');
 export function runMigrations(): void {
   const db = getDb();
 
+  // Schema changes (DROP parent tables, rebuild-via-copy) need FK
+  // enforcement off. Also pin legacy_alter_table so RENAME doesn't rewrite
+  // child FK references out from under us.
+  db.pragma('foreign_keys = OFF');
+  db.pragma('legacy_alter_table = ON');
+
   db.exec(
     'CREATE TABLE IF NOT EXISTS _migrations (\n' +
       '  id         TEXT PRIMARY KEY,\n' +

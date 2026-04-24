@@ -2,7 +2,7 @@
 // Single source of truth for share-related DB row types.
 // Plan §A.1 — any drift from this file is a review-blocking issue.
 
-export type ShareMediaType = 'movie' | 'episode';
+export type ShareMediaType = 'movie' | 'episode' | 'show';
 
 export interface ShareRow {
   id: string; // nanoid(12) link_id

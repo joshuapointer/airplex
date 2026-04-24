@@ -34,8 +34,25 @@ export async function GET(
   }
   const row = guarded as ShareRow;
 
+  // Per-episode override for shows. Share at show level carries
+  // row.plex_rating_key = the series; the player passes ?rk=<episode> when
+  // the recipient picks an episode. Strict numeric guard to prevent
+  // injection into the Plex `path` param.
+  const url = new URL(request.url);
+  const rkParam = url.searchParams.get('rk');
+  let ratingKey = row.plex_rating_key;
+  if (rkParam) {
+    if (!/^\d+$/.test(rkParam)) {
+      return NextResponse.json({ error: 'invalid_rk' }, { status: 400 });
+    }
+    if (row.plex_media_type !== 'show') {
+      return NextResponse.json({ error: 'rk_override_requires_show' }, { status: 400 });
+    }
+    ratingKey = rkParam;
+  }
+
   const startUrl = buildStartUrl({
-    ratingKey: row.plex_rating_key,
+    ratingKey,
     linkId: row.id,
   });
   const parsed = new URL(startUrl);
