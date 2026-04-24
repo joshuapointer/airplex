@@ -11,6 +11,27 @@
   --np-font-body: 'JetBrains Mono', monospace;
   --np-radius-sharp: 2px;
   --np-radius-soft: 6px;
+
+  /* ── Mission B (Transmission) — tokens ── */
+  --np-bracket-thickness: 1px;
+  --np-bracket-length: 18px;
+  --np-bracket-inset: 8px;
+  --np-ambient-opacity: 0.18;
+  --np-ambient-blur: 48px;
+  --np-ambient-saturate: 1.1;
+  --np-transmission-scan: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--np-magenta) 50%,
+    transparent 100%
+  );
+  --np-machined-bar-inset:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.14), inset 0 -1.5px 0 rgba(0, 0, 0, 0.65);
+  --np-ttl-track: rgba(255, 255, 255, 0.08);
+  --np-ttl-fill: var(--np-green);
+  --np-ttl-fill-warn: var(--np-magenta);
+  --np-live-dot: var(--np-green);
+  --np-typewriter-char-ms: 18ms;
 }
 
 html,
@@ -285,17 +306,6 @@ body {
   /* ── Ken Burns backdrop ── */
   .backdrop-kenburns {
     animation: np-kenburns 24s linear infinite alternate;
-  }
-
-  /* ── Poster thumbnail ── */
-  .poster-thumb {
-    transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
-    transform-origin: bottom left;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .poster-thumb:hover {
-      transform: scale(1.02);
-    }
   }
 
   /* ────────────────────────────────────────────────────────────────
@@ -803,6 +813,213 @@ body {
       min-height: 34px;
     }
   }
+
+  /* ────────────────────────────────────────────────────────────────
+   * Mission B (Transmission) — frame brackets, ambient, scan, share tile,
+   * now-live strip, TTL hairline, poster fallback, envelope input,
+   * live dot, machined play button.
+   * ──────────────────────────────────────────────────────────────── */
+
+  /* ── Frame brackets ── */
+  .frame-brackets {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    color: var(--np-fg);
+  }
+  .frame-brackets svg {
+    position: absolute;
+    width: var(--np-bracket-length, 18px);
+    height: var(--np-bracket-length, 18px);
+  }
+  .frame-brackets svg path {
+    animation: np-trace-in-svg 600ms var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) both;
+  }
+  .frame-brackets svg:nth-child(1) path {
+    animation-delay: 0ms;
+  }
+  .frame-brackets svg:nth-child(2) path {
+    animation-delay: 80ms;
+  }
+  .frame-brackets svg:nth-child(3) path {
+    animation-delay: 160ms;
+  }
+  .frame-brackets svg:nth-child(4) path {
+    animation-delay: 240ms;
+  }
+
+  /* ── One-shot magenta scan sweep ── */
+  .frame-scan {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--np-transmission-scan);
+    z-index: 2;
+    animation: np-scan-sweep 900ms var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) both;
+    animation-iteration-count: 1;
+    mix-blend-mode: screen;
+    opacity: 0.6;
+  }
+
+  /* ── Typewriter container (JS drives content) ── */
+  .typewriter {
+    display: inline-block;
+  }
+
+  /* ── Ambient poster backdrop ── */
+  .ambient-backdrop {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(var(--np-ambient-blur)) saturate(var(--np-ambient-saturate));
+    opacity: var(--np-ambient-opacity);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Share tile (3:4 poster card in Now Live strip) ── */
+  .share-tile {
+    min-width: 160px;
+    max-width: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Library tile (wizard step-2 item picker) ── */
+  .library-tile {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Poster card (PosterCard wrapper figure) ── */
+  .poster-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--np-radius-sharp);
+    display: block;
+  }
+
+  /* ── Now Live horizontal strip ── */
+  .now-live-strip {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1rem;
+    scrollbar-width: none;
+  }
+  .now-live-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── TTL hairline progress bar ── */
+  .ttl-hairline {
+    position: relative;
+    width: 100%;
+    height: 2px;
+    background: var(--np-ttl-track);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .ttl-hairline.compact {
+    height: 1px;
+  }
+  .ttl-hairline::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--ttl-fill-pct, 0%);
+    background: var(--np-ttl-fill);
+    border-radius: 999px;
+    transition: width 300ms var(--np-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .ttl-hairline[data-warn='true']::after {
+    background: var(--np-ttl-fill-warn);
+  }
+
+  /* ── Machined play button (extends .btn-play) ── */
+  .btn-machined {
+    box-shadow: var(--np-machined-bar-inset), var(--np-glow-green);
+  }
+  .btn-machined:active {
+    transform: translateY(1px) scale(0.97);
+  }
+
+  /* ── Poster fallback (initial letter on machined surface) ── */
+  .poster-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      135deg,
+      var(--np-surface-2, #1a1a1a) 0%,
+      var(--np-surface-1, #0a0a0a) 100%
+    );
+    font-family: var(--np-font-display);
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.22);
+    font-size: clamp(2rem, 20%, 6rem);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Envelope-style input field (label inside top border) ── */
+  .envelope-input {
+    position: relative;
+    border: 1px solid var(--np-border, rgba(255, 255, 255, 0.12));
+    border-radius: var(--np-radius-sharp);
+    padding: 1.25rem 0.75rem 0.5rem;
+  }
+  .envelope-input > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(0.5rem, -50%);
+    padding: 0 0.3rem;
+    background: var(--np-bg);
+    font-family: var(--np-font-body);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--np-muted);
+  }
+  .envelope-input input,
+  .envelope-input textarea {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: var(--np-fg);
+    font-family: var(--np-font-body);
+    font-size: 0.9rem;
+  }
+  .envelope-input textarea {
+    resize: vertical;
+    padding-top: 0.25rem;
+    line-height: 1.4;
+  }
+  .envelope-input input:-webkit-autofill,
+  .envelope-input textarea:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 100px var(--np-bg) inset;
+    -webkit-text-fill-color: var(--np-fg);
+  }
+
+  /* ── Live dot (pinging share) ── */
+  .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--np-live-dot);
+    box-shadow: 0 0 6px var(--np-live-dot);
+    animation: np-bloom-box 2.4s ease-in-out infinite;
+  }
 }
 
 @keyframes np-pop-in {
@@ -822,6 +1039,47 @@ body {
   }
   to {
     transform: scale(1.22);
+  }
+}
+
+/* Mission B — Transmission keyframes (renamed to avoid neopointer-ui collisions) */
+@keyframes np-trace-in-svg {
+  from {
+    stroke-dashoffset: var(--np-trace-length, 100);
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes np-scan-sweep {
+  from {
+    transform: translate3d(0, -100%, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes np-bloom-box {
+  0% {
+    box-shadow: var(--np-glow-green);
+  }
+  50% {
+    box-shadow: var(--np-glow-green-strong);
+  }
+  100% {
+    box-shadow: var(--np-glow-green);
   }
 }
 
@@ -856,8 +1114,26 @@ body {
   .airplay-hint:active {
     transform: none;
   }
-  .poster-thumb:hover {
+
+  /* Mission B — Transmission reduced-motion overrides */
+  .frame-brackets svg path {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  .frame-scan {
+    animation: none;
+    opacity: 0;
+  }
+  .ttl-hairline::after {
+    transition: none;
+  }
+  .btn-machined:active {
     transform: none;
+  }
+  .live-dot {
+    animation: none;
+    opacity: 1;
   }
 }
 

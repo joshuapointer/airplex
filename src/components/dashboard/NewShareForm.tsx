@@ -6,7 +6,7 @@ import type { PlexMetadata } from '@/types/plex';
 import { LibraryPicker } from './LibraryPicker';
 import { useCsrf } from './CsrfContext';
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { Input } from '@/components/ui/Input';
+import { PosterCard } from '@/components/ui/transmission';
 
 type Step = 'library' | 'item' | 'details' | 'done';
 
@@ -40,6 +40,23 @@ function StepIndicator({ current }: { current: Step }) {
   );
 }
 
+function EnvelopeField({
+  label,
+  id,
+  children,
+}: {
+  label: string;
+  id: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="envelope-input mb-4">
+      <label htmlFor={id}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
 export function NewShareForm() {
   const csrf = useCsrf();
   const router = useRouter();
@@ -51,6 +68,7 @@ export function NewShareForm() {
   const [itemsError, setItemsError] = useState<string | null>(null);
 
   const [selectedItem, setSelectedItem] = useState<PlexMetadata | null>(null);
+  const [itemQuery, setItemQuery] = useState('');
 
   // Details form state
   const [recipientLabel, setRecipientLabel] = useState('');
@@ -135,8 +153,6 @@ export function NewShareForm() {
   }
 
   const heading = 'font-display uppercase tracking-wide text-lg text-np-cyan mb-4';
-  const textareaCls =
-    'w-full rounded-sharp border px-3 py-2 text-sm font-mono text-np-fg placeholder-np-muted bg-[var(--np-input-bg,rgba(0,0,0,0.4))] border-[rgba(255,255,255,0.12)] outline-none focus:border-np-green focus:ring-1 focus:ring-np-green transition-colors resize-y';
 
   // ---- Step: library ----
   if (step === 'library') {
@@ -165,39 +181,68 @@ export function NewShareForm() {
 
   // ---- Step: pick item ----
   if (step === 'item') {
+    const filteredItems = items.filter((i) => {
+      const q = itemQuery.toLowerCase();
+      return (i.title + ' ' + (i.grandparentTitle ?? '') + ' ' + (i.parentTitle ?? ''))
+        .toLowerCase()
+        .includes(q);
+    });
     return (
       <div>
         <StepIndicator current={step} />
         <div key="item" className="animate-enter">
           <h2 className={heading}>Step 2 — Pick an Item</h2>
-          <button onClick={() => setStep('library')} className="btn-ghost text-xs mb-4">
+          <button
+            onClick={() => {
+              setItemQuery('');
+              setStep('library');
+            }}
+            className="btn-ghost text-xs mb-4"
+          >
             ← Back
           </button>
-          <GlassPanel className="max-h-[400px] overflow-y-auto p-2 flex flex-col gap-1">
-            {items.length === 0 ? (
-              <p className="p-4 text-np-muted font-mono text-sm">No items found in this library.</p>
-            ) : (
-              items.map((item) => (
+          <input
+            type="text"
+            value={itemQuery}
+            onChange={(e) => setItemQuery(e.target.value)}
+            placeholder="⌕ Search…"
+            className="w-full bg-transparent border border-[rgba(255,255,255,0.12)] rounded-sharp px-3 py-2 text-sm font-mono text-np-fg outline-none focus:border-np-cyan mb-4"
+            aria-label="Search items"
+          />
+          {items.length === 0 ? (
+            <p className="p-4 text-np-muted font-mono text-sm">No items found in this library.</p>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x">
+              {filteredItems.map((item) => (
                 <button
                   key={item.ratingKey}
                   onClick={() => {
                     setSelectedItem(item);
                     setStep('details');
                   }}
-                  className="episode-row text-sm"
+                  className="library-tile snap-start shrink-0 bg-transparent border border-[rgba(255,255,255,0.1)] rounded-sharp p-2 hover:border-np-cyan transition-colors text-left"
+                  style={{ width: '180px' }}
                 >
-                  <span>
-                    <span className="text-np-cyan mr-2 font-mono text-xs uppercase">
-                      [{item.type}]
+                  <PosterCard
+                    posterUrl={null}
+                    title={item.title}
+                    aspect="3/4"
+                    width={160}
+                    height={240}
+                    loading="lazy"
+                  />
+                  <div className="mt-2 flex flex-col gap-0.5">
+                    <span className="font-mono text-xs text-np-muted uppercase">{item.type}</span>
+                    <span className="font-mono text-sm text-np-fg line-clamp-2">
+                      {item.grandparentTitle
+                        ? `${item.grandparentTitle} — ${item.title}`
+                        : item.title}
                     </span>
-                    {item.grandparentTitle
-                      ? `${item.grandparentTitle} — ${item.parentTitle ?? ''} — ${item.title}`
-                      : item.title}
-                  </span>
+                  </div>
                 </button>
-              ))
-            )}
-          </GlassPanel>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -218,59 +263,58 @@ export function NewShareForm() {
             Sharing: <strong className="text-np-fg">{selectedItem?.title}</strong>
           </p>
 
-          <form onSubmit={handleSubmit} className="mt-5 max-w-[480px] flex flex-col gap-4">
-            <Input
-              label="Recipient label *"
-              required
-              value={recipientLabel}
-              onChange={(e) => setRecipientLabel(e.target.value)}
-              placeholder="e.g. Alice"
-            />
-
-            <Input
-              label="From (shown to recipient, optional)"
-              maxLength={60}
-              value={senderLabel}
-              onChange={(e) => setSenderLabel(e.target.value)}
-              placeholder="e.g. Josh"
-            />
-
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="recipient-note"
-                className="text-xs font-mono uppercase tracking-wider text-np-muted"
-              >
-                Note (optional)
-              </label>
+          <form onSubmit={handleSubmit} className="mt-5 max-w-[480px]">
+            <EnvelopeField label="To" id="recipient_label">
+              <input
+                id="recipient_label"
+                required
+                value={recipientLabel}
+                onChange={(e) => setRecipientLabel(e.target.value)}
+                placeholder="Alice"
+              />
+            </EnvelopeField>
+            <EnvelopeField label="From" id="sender_label">
+              <input
+                id="sender_label"
+                maxLength={60}
+                value={senderLabel}
+                onChange={(e) => setSenderLabel(e.target.value)}
+                placeholder="Josh"
+              />
+            </EnvelopeField>
+            <EnvelopeField label="Note" id="recipient_note">
               <textarea
-                id="recipient-note"
+                id="recipient_note"
                 value={recipientNote}
                 onChange={(e) => setRecipientNote(e.target.value)}
-                placeholder="Private note about this share"
+                placeholder="Optional private note"
                 rows={2}
-                className={textareaCls}
               />
+            </EnvelopeField>
+            <div className="grid grid-cols-2 gap-4">
+              <EnvelopeField label="TTL (hours)" id="ttl_hours">
+                <input
+                  id="ttl_hours"
+                  type="number"
+                  min={1}
+                  max={168}
+                  value={ttlHours}
+                  onChange={(e) => setTtlHours(e.target.value)}
+                />
+              </EnvelopeField>
+              <EnvelopeField label="Max plays" id="max_plays">
+                <input
+                  id="max_plays"
+                  type="number"
+                  min={1}
+                  value={maxPlays}
+                  onChange={(e) => setMaxPlays(e.target.value)}
+                  placeholder="Unlimited"
+                />
+              </EnvelopeField>
             </div>
 
-            <Input
-              label="TTL (hours)"
-              type="number"
-              min={1}
-              max={168}
-              value={ttlHours}
-              onChange={(e) => setTtlHours(e.target.value)}
-            />
-
-            <Input
-              label="Max plays (blank = unlimited)"
-              type="number"
-              min={1}
-              value={maxPlays}
-              onChange={(e) => setMaxPlays(e.target.value)}
-              placeholder="Unlimited"
-            />
-
-            {submitError && <p className="text-np-magenta font-mono text-sm">{submitError}</p>}
+            {submitError && <p className="text-np-magenta font-mono text-sm mb-3">{submitError}</p>}
 
             <div>
               <button
@@ -320,6 +364,7 @@ export function NewShareForm() {
                 setSectionId('');
                 setItems([]);
                 setSelectedItem(null);
+                setItemQuery('');
                 setRecipientLabel('');
                 setRecipientNote('');
                 setSenderLabel('');

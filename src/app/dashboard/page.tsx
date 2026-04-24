@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { listShares, computeShareStatus } from '@/db/queries/shares';
-import { GlassPanel } from '@/components/ui/GlassPanel';
+import { getRecentPlayShareIds } from '@/db/queries/events';
+import { NowLiveStrip } from '@/components/ui/transmission';
+import type { LiveMap } from '@/types/transmission';
 
 export default async function DashboardPage() {
   // Layout already enforced auth gate. Fetch directly via server component.
@@ -22,7 +24,14 @@ export default async function DashboardPage() {
     }
   }
 
-  const total = allShares.length;
+  const activeShares = allShares.filter((s) => {
+    const st = computeShareStatus(s, now);
+    return st.active;
+  });
+
+  const recentIds = getRecentPlayShareIds();
+  const liveMap: LiveMap = {};
+  for (const s of activeShares) liveMap[s.id] = recentIds.has(s.id);
 
   return (
     <div>
@@ -30,35 +39,19 @@ export default async function DashboardPage() {
         Dashboard
       </h1>
 
-      <div className="animate-enter-delay-1 grid gap-4 mb-8 grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
-        <StatCard label="Total" value={total} color="var(--np-fg)" />
-        <StatCard label="Active" value={active} color="var(--np-green)" />
-        <StatCard label="Expired" value={expired} color="var(--np-muted)" />
-        <StatCard label="Revoked" value={revoked} color="var(--np-magenta)" />
-      </div>
+      <section className="animate-enter-delay-1">
+        <h2 className="font-display text-sm text-np-muted uppercase tracking-[0.1em] mb-3">
+          Now Live ({activeShares.length})
+        </h2>
+        <NowLiveStrip shares={activeShares} liveMap={liveMap} />
+      </section>
 
-      <p className="animate-enter-delay-2 text-sm text-np-muted font-mono">
-        Use{' '}
+      <p className="text-xs text-np-muted font-mono mt-6 animate-enter-delay-2">
+        {active} active · {expired} expired · {revoked} revoked ·{' '}
         <Link href="/dashboard/shares" className="text-np-cyan no-underline hover:underline">
-          Shares
-        </Link>{' '}
-        to manage existing links or{' '}
-        <Link href="/dashboard/shares/new" className="text-np-cyan no-underline hover:underline">
-          New Share
-        </Link>{' '}
-        to create one.
+          view all →
+        </Link>
       </p>
     </div>
-  );
-}
-
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <GlassPanel className="p-5">
-      <div className="font-display text-3xl font-bold" style={{ color }}>
-        {value}
-      </div>
-      <div className="text-xs text-np-muted mt-1 font-mono uppercase tracking-wider">{label}</div>
-    </GlassPanel>
   );
 }

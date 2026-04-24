@@ -34,6 +34,7 @@ let _stmts: {
   revokeShare: Database.Statement<[number, string]>;
   extendShare: Database.Statement<[number, string]>;
   incrementPlayCount: Database.Statement<[string]>;
+  pickAmbientActive: Database.Statement<[number], ShareRow>;
 } | null = null;
 
 function stmts() {
@@ -65,6 +66,11 @@ function stmts() {
     revokeShare: db.prepare('UPDATE shares SET revoked_at = ? WHERE id = ?'),
     extendShare: db.prepare('UPDATE shares SET expires_at = ? WHERE id = ?'),
     incrementPlayCount: db.prepare('UPDATE shares SET play_count = play_count + 1 WHERE id = ?'),
+    pickAmbientActive: db.prepare(
+      'SELECT * FROM shares\n' +
+        '  WHERE revoked_at IS NULL AND expires_at > ? AND poster_path IS NOT NULL\n' +
+        '  ORDER BY expires_at ASC LIMIT 1',
+    ),
   };
   return _stmts;
 }
@@ -149,6 +155,16 @@ export function extendShare(id: string, newExpiresAt: number): void {
 
 export function incrementPlayCount(id: string): void {
   stmts().incrementPlayCount.run(id);
+}
+
+/**
+ * Pick the non-revoked, non-expired share with a poster closest to expiry.
+ * Used for the admin ambient backdrop. Returns null when no candidate exists.
+ * Does NOT check max_plays exhaustion (cheap query — callers can filter if needed).
+ */
+export function pickAmbientShare(now?: number): ShareRow | null {
+  const t = now ?? Math.floor(Date.now() / 1000);
+  return (stmts().pickAmbientActive.get(t) as ShareRow | undefined) ?? null;
 }
 
 /**

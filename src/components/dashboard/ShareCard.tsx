@@ -8,6 +8,7 @@ import { useCsrf } from './CsrfContext';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Badge, type BadgeStatus } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { AmbientBackdrop } from '@/components/ui/transmission';
 
 interface ShareCardProps {
   share: Omit<ShareRow, 'token_hash'>;
@@ -72,106 +73,116 @@ export function ShareCard({ share, status }: ShareCardProps) {
         : 'Active';
 
   return (
-    <GlassPanel className="p-6 max-w-[640px]">
-      {/* Header */}
-      <div className="mb-5">
-        <h2 className="font-display text-xl text-np-fg mb-1">{share.title}</h2>
-        <Badge status={badgeStatus}>{statusLabel}</Badge>
-      </div>
-
-      {/* Fields */}
-      <dl className="grid grid-cols-[max-content_1fr] gap-x-5 gap-y-2 text-sm mb-6">
-        <Dt>Recipient</Dt>
-        <Dd>{share.recipient_label}</Dd>
-
-        {share.recipient_note && (
-          <>
-            <Dt>Note</Dt>
-            <Dd>{share.recipient_note}</Dd>
-          </>
-        )}
-
-        <Dt>Media type</Dt>
-        <Dd>{share.plex_media_type}</Dd>
-
-        <Dt>Created</Dt>
-        <Dd>{formatDate(share.created_at)}</Dd>
-
-        <Dt>Expires</Dt>
-        <Dd>{formatDate(share.expires_at)}</Dd>
-
-        <Dt>Plays</Dt>
-        <Dd>
-          {share.play_count}
-          {share.max_plays !== null ? ` / ${share.max_plays}` : ' (unlimited)'}
-        </Dd>
-
-        <Dt>Device locked</Dt>
-        <Dd>{status.claimed ? 'Yes' : 'No'}</Dd>
-
-        {share.revoked_at !== null && (
-          <>
-            <Dt>Revoked at</Dt>
-            <Dd>{formatDate(share.revoked_at)}</Dd>
-          </>
-        )}
-      </dl>
-
-      {/* Actions */}
-      {error && <p className="text-np-magenta font-mono text-sm mb-3">{error}</p>}
-
-      <div className="flex flex-wrap gap-3 items-end">
-        {!status.revoked && (
-          <button
-            onClick={() => patch({ action: 'revoke' })}
-            disabled={loading !== null}
-            className="btn-ghost text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              color: 'var(--np-magenta)',
-              borderColor: 'var(--np-magenta)',
-            }}
-          >
-            {loading === 'revoke' ? 'Revoking…' : 'Revoke'}
-          </button>
-        )}
-
-        {status.claimed && !status.revoked && (
-          <button
-            onClick={() => patch({ action: 'reset_device' })}
-            disabled={loading !== null}
-            className="btn-ghost text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              color: 'var(--np-cyan)',
-              borderColor: 'var(--np-cyan)',
-            }}
-          >
-            {loading === 'reset_device' ? 'Resetting…' : 'Reset Device'}
-          </button>
-        )}
-
-        {!status.revoked && (
-          <div className="flex gap-2 items-end">
-            <Input
-              type="number"
-              min={1}
-              max={168}
-              value={extendHours}
-              onChange={(e) => setExtendHours(e.target.value)}
-              className="w-20"
-              aria-label="Extend hours"
-            />
-            <span className="text-np-muted text-xs font-mono pb-3">hrs</span>
-            <button
-              onClick={() => patch({ action: 'extend', ttl_hours: Number(extendHours) })}
-              disabled={loading !== null || !extendHours}
-              className="btn-primary text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading === 'extend' ? 'Extending…' : 'Extend'}
-            </button>
+    <div className="relative">
+      <AmbientBackdrop
+        posterUrl={`/api/admin/shares/${share.id}/poster`}
+        kenBurns
+        loading="lazy"
+        opacity={0.15}
+      />
+      <div className="relative" style={{ zIndex: 3 }}>
+        <GlassPanel className="p-6 max-w-[640px]">
+          {/* Header */}
+          <div className="mb-5">
+            <h2 className="font-display text-xl text-np-fg mb-1">{share.title}</h2>
+            <Badge status={badgeStatus}>{statusLabel}</Badge>
           </div>
-        )}
+
+          {/* Fields */}
+          <dl className="grid grid-cols-[max-content_1fr] gap-x-5 gap-y-2 text-sm mb-6">
+            <Dt>Recipient</Dt>
+            <Dd>{share.recipient_label}</Dd>
+
+            {share.recipient_note && (
+              <>
+                <Dt>Note</Dt>
+                <Dd>{share.recipient_note}</Dd>
+              </>
+            )}
+
+            <Dt>Media type</Dt>
+            <Dd>{share.plex_media_type}</Dd>
+
+            <Dt>Created</Dt>
+            <Dd>{formatDate(share.created_at)}</Dd>
+
+            <Dt>Expires</Dt>
+            <Dd>{formatDate(share.expires_at)}</Dd>
+
+            <Dt>Plays</Dt>
+            <Dd>
+              {share.play_count}
+              {share.max_plays !== null ? ` / ${share.max_plays}` : ' (unlimited)'}
+            </Dd>
+
+            <Dt>Device locked</Dt>
+            <Dd>{status.claimed ? 'Yes' : 'No'}</Dd>
+
+            {share.revoked_at !== null && (
+              <>
+                <Dt>Revoked at</Dt>
+                <Dd>{formatDate(share.revoked_at)}</Dd>
+              </>
+            )}
+          </dl>
+
+          {/* Actions */}
+          {error && <p className="text-np-magenta font-mono text-sm mb-3">{error}</p>}
+
+          <div className="flex flex-wrap gap-3 items-end">
+            {!status.revoked && (
+              <button
+                onClick={() => patch({ action: 'revoke' })}
+                disabled={loading !== null}
+                className="btn-ghost text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  color: 'var(--np-magenta)',
+                  borderColor: 'var(--np-magenta)',
+                }}
+              >
+                {loading === 'revoke' ? 'Revoking…' : 'Revoke'}
+              </button>
+            )}
+
+            {status.claimed && !status.revoked && (
+              <button
+                onClick={() => patch({ action: 'reset_device' })}
+                disabled={loading !== null}
+                className="btn-ghost text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  color: 'var(--np-cyan)',
+                  borderColor: 'var(--np-cyan)',
+                }}
+              >
+                {loading === 'reset_device' ? 'Resetting…' : 'Reset Device'}
+              </button>
+            )}
+
+            {!status.revoked && (
+              <div className="flex gap-2 items-end">
+                <Input
+                  type="number"
+                  min={1}
+                  max={168}
+                  value={extendHours}
+                  onChange={(e) => setExtendHours(e.target.value)}
+                  className="w-20"
+                  aria-label="Extend hours"
+                />
+                <span className="text-np-muted text-xs font-mono pb-3">hrs</span>
+                <button
+                  onClick={() => patch({ action: 'extend', ttl_hours: Number(extendHours) })}
+                  disabled={loading !== null || !extendHours}
+                  className="btn-primary text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading === 'extend' ? 'Extending…' : 'Extend'}
+                </button>
+              </div>
+            )}
+          </div>
+        </GlassPanel>
       </div>
-    </GlassPanel>
+    </div>
   );
 }
 

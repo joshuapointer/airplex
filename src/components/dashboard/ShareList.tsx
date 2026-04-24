@@ -10,6 +10,7 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { Badge, type BadgeStatus } from '@/components/ui/Badge';
+import { PosterCard, TtlHairline } from '@/components/ui/transmission';
 
 function badgeForRow(row: ShareRow): { status: BadgeStatus; label: string } {
   const s = computeShareStatus(row);
@@ -45,10 +46,13 @@ export function ShareList({ shares }: ShareListProps) {
     );
   }
 
+  const now = Math.floor(Date.now() / 1000);
+
   return (
     <Table>
       <TableHead>
         <TableRow>
+          <TableHeader style={{ width: '48px', padding: '0.25rem 0.5rem' }}></TableHeader>
           <TableHeader>Recipient</TableHeader>
           <TableHeader>Title</TableHeader>
           <TableHeader>Status</TableHeader>
@@ -62,6 +66,16 @@ export function ShareList({ shares }: ShareListProps) {
           const { status, label } = badgeForRow(row);
           return (
             <TableRow key={row.id}>
+              <TableCell style={{ width: '48px', padding: '0.25rem 0.5rem' }}>
+                <PosterCard
+                  posterUrl={row.poster_path ? `/api/admin/shares/${row.id}/poster` : null}
+                  title={row.title}
+                  aspect="3/4"
+                  width={40}
+                  height={60}
+                  loading="lazy"
+                />
+              </TableCell>
               <TableCell className="max-w-[200px] truncate whitespace-nowrap">
                 {row.recipient_label}
               </TableCell>
@@ -71,7 +85,17 @@ export function ShareList({ shares }: ShareListProps) {
               <TableCell className="whitespace-nowrap">
                 <Badge status={status}>{label}</Badge>
               </TableCell>
-              <TableCell className="whitespace-nowrap">{formatDate(row.expires_at)}</TableCell>
+              <TableCell>
+                <div className="flex flex-col gap-1">
+                  <span>{formatDate(row.expires_at)}</span>
+                  <TtlHairline
+                    createdAt={row.created_at}
+                    expiresAt={row.expires_at}
+                    now={now}
+                    compact
+                  />
+                </div>
+              </TableCell>
               <TableCell className="whitespace-nowrap">
                 {row.play_count}
                 {row.max_plays !== null ? ` / ${row.max_plays}` : ''}

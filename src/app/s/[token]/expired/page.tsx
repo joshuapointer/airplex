@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { FrameBrackets } from '@/components/ui/transmission';
+
 export const metadata: Metadata = {
   title: 'airplex — link unavailable',
   referrer: 'no-referrer',
@@ -49,55 +51,62 @@ export default async function ExpiredPage({
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6 bg-np-bg text-np-fg safe-top safe-bottom safe-x">
-      <section
-        className="glass max-w-sm w-full p-8 animate-enter"
-        role="main"
-        aria-labelledby="expired-heading"
-      >
-        {/* Brand */}
-        <p
-          className="font-mono text-xs uppercase tracking-widest mb-6"
-          style={{ color: copy.accentColor }}
+      <div className="relative max-w-sm w-full">
+        <FrameBrackets />
+        <section
+          className="glass w-full p-8 animate-enter relative"
+          style={{ zIndex: 3 }}
+          role="main"
+          aria-labelledby="expired-heading"
         >
-          airplex
-        </p>
-
-        {/* Icon mark */}
-        <div className="mb-5" aria-hidden="true">
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          {/* Brand */}
+          <p
+            className="font-mono text-xs uppercase tracking-widest mb-6"
             style={{ color: copy.accentColor }}
           >
-            <circle cx="18" cy="18" r="17" stroke="currentColor" strokeWidth="1.5" />
-            <path
-              d="M18 10v10M18 26v.5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
+            airplex
+          </p>
 
-        {/* Heading */}
-        <h1
-          id="expired-heading"
-          className="font-display text-3xl uppercase tracking-wide text-np-fg mb-3 leading-tight"
-        >
-          {copy.headline}
-        </h1>
+          {/* Icon mark */}
+          <div className="mb-5" aria-hidden="true">
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 36 36"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ color: copy.accentColor }}
+            >
+              <circle cx="18" cy="18" r="17" stroke="currentColor" strokeWidth="1.5" />
+              <path
+                d="M18 10v10M18 26v.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
 
-        {/* Body */}
-        <p className="font-mono text-sm text-np-muted leading-relaxed mb-4">{copy.body}</p>
+          {/* Heading */}
+          <h1
+            id="expired-heading"
+            className="font-display text-3xl uppercase tracking-wide text-np-fg mb-3 leading-tight"
+          >
+            {copy.headline}
+          </h1>
 
-        {/* Hint — what to do next */}
-        <p className="font-mono text-xs leading-relaxed" style={{ color: 'var(--np-text-faint)' }}>
-          {copy.hint}
-        </p>
-      </section>
+          {/* Body */}
+          <p className="font-mono text-sm text-np-muted leading-relaxed mb-4">{copy.body}</p>
+
+          {/* Hint — what to do next */}
+          <p
+            className="font-mono text-xs leading-relaxed"
+            style={{ color: 'var(--np-text-faint)' }}
+          >
+            {copy.hint}
+          </p>
+        </section>
+      </div>
     </main>
   );
 }

@@ -69,3 +69,24 @@ export function logEvent(args: LogEventArgs): void {
         : JSON.stringify(args.detail);
   insertStmt().run(args.share_id, at, args.kind, ip_hash, ua_hash, detail);
 }
+
+// ---------- live-window helpers ----------
+
+/** 4× ShareWatcher.PING_INTERVAL_MS (30s). Used for admin "Now Live" derivation. */
+export const LIVE_WINDOW_S = 120;
+
+let _recentPlayStmt: Database.Statement<[number]> | null = null;
+
+function recentPlayStmt() {
+  if (_recentPlayStmt) return _recentPlayStmt;
+  _recentPlayStmt = getDb().prepare<[number]>(
+    "SELECT DISTINCT share_id FROM share_events WHERE kind = 'play' AND at >= ?",
+  );
+  return _recentPlayStmt;
+}
+
+export function getRecentPlayShareIds(withinSeconds: number = LIVE_WINDOW_S): Set<string> {
+  const threshold = Math.floor(Date.now() / 1000) - withinSeconds;
+  const rows = recentPlayStmt().all(threshold) as { share_id: string }[];
+  return new Set(rows.map((r) => r.share_id));
+}
