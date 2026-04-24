@@ -6,7 +6,7 @@ export default function NewSharePage() {
     <div className="animate-enter">
       <h1 className="font-display uppercase tracking-wide text-2xl text-np-cyan mb-6">New Share</h1>
 
-      <GlassPanel className="p-6 max-w-[640px]">
+      <GlassPanel className="p-4 sm:p-6 max-w-[640px]">
         <NewShareForm />
       </GlassPanel>
     </div>

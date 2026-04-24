@@ -94,8 +94,8 @@ function ShareListInner({ shares }: ShareListProps) {
             <TableHeader>Recipient</TableHeader>
             <TableHeader>Title</TableHeader>
             <TableHeader>Status</TableHeader>
-            <TableHeader>Expires</TableHeader>
-            <TableHeader>Plays</TableHeader>
+            <TableHeader className="hidden md:table-cell">Expires</TableHeader>
+            <TableHeader className="hidden sm:table-cell">Plays</TableHeader>
             <TableHeader>Actions</TableHeader>
           </TableRow>
         </TableHead>
@@ -136,7 +136,7 @@ function ShareListInner({ shares }: ShareListProps) {
                   <TableCell className="whitespace-nowrap">
                     <Badge status={status}>{label}</Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div className="flex flex-col gap-1">
                       <span>{formatDate(row.expires_at)}</span>
                       <TtlHairline
@@ -147,7 +147,7 @@ function ShareListInner({ shares }: ShareListProps) {
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="hidden sm:table-cell whitespace-nowrap">
                     {row.play_count}
                     {row.max_plays !== null ? ` / ${row.max_plays}` : ''}
                   </TableCell>

@@ -343,7 +343,7 @@ export function NewShareForm() {
               rows={2}
             />
           </EnvelopeField>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <EnvelopeField label="TTL (hours)" id="ttl_hours">
               <input
                 id="ttl_hours"
