@@ -19,6 +19,7 @@ import {
   incrementPlayCount,
 } from '@/db/queries/shares';
 import { computeDeviceFp, ironConfigFor, type DeviceLockCookiePayload } from '@/lib/device-lock';
+import { buildShareMetadata } from '@/lib/share-metadata';
 import { hashShareToken, verifyShareTokenSignature } from '@/lib/share-token';
 import { formatTtlLong } from '@/lib/ttl';
 
@@ -36,11 +37,14 @@ function isLinkPreviewBot(ua: string): boolean {
   return LINK_PREVIEW_BOT_RE.test(ua);
 }
 
-export const metadata: Metadata = {
-  title: 'airplex',
-  referrer: 'no-referrer',
-  robots: 'noindex,nofollow',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  return buildShareMetadata(token);
+}
 
 export const dynamic = 'force-dynamic';
 
