@@ -186,8 +186,14 @@
   "hotPaths": [
     {
       "path": "src/app/s/[token]/page.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1777005273733,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
       "accessCount": 7,
-      "lastAccessed": 1777004101677,
+      "lastAccessed": 1777005016754,
       "type": "file"
     },
     {
@@ -200,6 +206,12 @@
       "path": "src/app/api/hls/[link_id]/seg/[...path]/route.ts",
       "accessCount": 3,
       "lastAccessed": 1777003648422,
+      "type": "file"
+    },
+    {
+      "path": "src/middleware.ts",
+      "accessCount": 3,
+      "lastAccessed": 1777005427436,
       "type": "file"
     },
     {
@@ -224,12 +236,6 @@
       "path": "ansible/roles/airplex/templates/docker-compose.yml.j2",
       "accessCount": 2,
       "lastAccessed": 1776998901111,
-      "type": "file"
-    },
-    {
-      "path": "src/middleware.ts",
-      "accessCount": 2,
-      "lastAccessed": 1776998987783,
       "type": "file"
     },
     {
@@ -258,15 +264,21 @@
     },
     {
       "path": "README.md",
-      "accessCount": 1,
-      "lastAccessed": 1776997438527,
+      "accessCount": 2,
+      "lastAccessed": 1777004970642,
       "type": "file"
     },
     {
       "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1776997438865,
+      "accessCount": 2,
+      "lastAccessed": 1777004973935,
       "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1777005190795,
+      "type": "directory"
     },
     {
       "path": "next.config.ts",
@@ -347,12 +359,6 @@
       "type": "file"
     },
     {
-      "path": "CLAUDE.md",
-      "accessCount": 1,
-      "lastAccessed": 1776997508418,
-      "type": "file"
-    },
-    {
       "path": "ansible/README.md",
       "accessCount": 1,
       "lastAccessed": 1776997753297,
@@ -411,12 +417,6 @@
       "accessCount": 1,
       "lastAccessed": 1776998187316,
       "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1776998590540,
-      "type": "directory"
     },
     {
       "path": "src/app/dashboard/page.tsx",

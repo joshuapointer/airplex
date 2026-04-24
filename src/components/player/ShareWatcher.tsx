@@ -53,19 +53,12 @@ export function ShareWatcher({ linkId, title, mediaType, rootRatingKey }: ShareW
         linkId={linkId}
         ratingKey={selectedRatingKey ?? rootRatingKey}
         title={title}
-        onBack={
-          mediaType === 'show' ? () => setSelectedRatingKey(null) : undefined
-        }
+        onBack={mediaType === 'show' ? () => setSelectedRatingKey(null) : undefined}
       />
     );
   }
 
-  return (
-    <EpisodePicker
-      linkId={linkId}
-      onPick={(ratingKey) => setSelectedRatingKey(ratingKey)}
-    />
-  );
+  return <EpisodePicker linkId={linkId} onPick={(ratingKey) => setSelectedRatingKey(ratingKey)} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -97,8 +90,7 @@ function EpisodePicker({
         const firstWithEps = json.seasons.find((s) => s.episodes.length > 0);
         setActiveSeasonKey(firstWithEps?.ratingKey ?? json.seasons[0]?.ratingKey ?? null);
       } catch (err) {
-        if (!cancelled)
-          setError(err instanceof Error ? err.message : 'Failed to load episodes');
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load episodes');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -141,51 +133,69 @@ function EpisodePicker({
 
   if (loading) {
     return (
-      <p style={{ color: 'var(--np-muted)', fontSize: '0.9rem' }}>Loading episodes…</p>
+      <div className="flex items-center gap-2 py-4" role="status" aria-live="polite">
+        {/* Animated dot row */}
+        <span
+          className="inline-block w-1.5 h-1.5 rounded-full bg-np-muted"
+          style={{ animation: 'np-breathe 1.2s ease-in-out 0ms infinite' }}
+          aria-hidden="true"
+        />
+        <span
+          className="inline-block w-1.5 h-1.5 rounded-full bg-np-muted"
+          style={{ animation: 'np-breathe 1.2s ease-in-out 200ms infinite' }}
+          aria-hidden="true"
+        />
+        <span
+          className="inline-block w-1.5 h-1.5 rounded-full bg-np-muted"
+          style={{ animation: 'np-breathe 1.2s ease-in-out 400ms infinite' }}
+          aria-hidden="true"
+        />
+        <span className="font-mono text-sm text-np-muted sr-only">Loading episodes…</span>
+      </div>
     );
   }
+
   if (error || !data) {
     return (
-      <p style={{ color: 'var(--np-magenta)', fontSize: '0.9rem' }}>
-        {error ?? 'No episodes available.'}
-      </p>
+      <div className="glass p-4 flex items-start gap-3" role="alert" aria-live="assertive">
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="text-np-magenta mt-0.5 shrink-0"
+        >
+          <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.2" />
+          <path
+            d="M8 4.5v4M8 10.5v.5"
+            stroke="currentColor"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+        </svg>
+        <p className="font-mono text-sm text-np-magenta">{error ?? 'No episodes available.'}</p>
+      </div>
     );
   }
 
-  const activeSeason =
-    data.seasons.find((s) => s.ratingKey === activeSeasonKey) ?? data.seasons[0];
+  const activeSeason = data.seasons.find((s) => s.ratingKey === activeSeasonKey) ?? data.seasons[0];
 
   return (
-    <div>
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.5rem',
-          flexWrap: 'wrap',
-          marginBottom: '1rem',
-          overflowX: 'auto',
-        }}
-      >
+    <div className="flex flex-col gap-4 animate-enter">
+      {/* Season tabs */}
+      <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Season selector">
         {data.seasons.map((s) => {
           const selected = s.ratingKey === activeSeason?.ratingKey;
           return (
             <button
               key={s.ratingKey}
               type="button"
+              role="tab"
+              aria-selected={selected}
               onClick={() => setActiveSeasonKey(s.ratingKey)}
-              style={{
-                padding: '0.4rem 0.9rem',
-                fontSize: '0.8rem',
-                fontFamily: 'var(--np-font-display)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                background: selected ? 'var(--np-cyan)' : 'transparent',
-                color: selected ? 'var(--np-bg)' : 'var(--np-fg)',
-                border: '1px solid var(--np-muted)',
-                borderRadius: 'var(--np-radius-sharp)',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+              className={`season-tab${selected ? ' active' : ''}`}
             >
               {s.title}
             </button>
@@ -193,7 +203,12 @@ function EpisodePicker({
         })}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      {/* Episode list */}
+      <div
+        className="flex flex-col gap-2"
+        role="tabpanel"
+        aria-label={activeSeason?.title ?? 'Episodes'}
+      >
         {(activeSeason?.episodes ?? []).map((e) => {
           const resumePos = resumeMap[e.ratingKey] ?? 0;
           const hasResume = resumePos > RESUME_THRESHOLD_MS;
@@ -202,55 +217,24 @@ function EpisodePicker({
               key={e.ratingKey}
               type="button"
               onClick={() => onPick(e.ratingKey)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-                padding: '0.75rem 1rem',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid var(--np-muted)',
-                borderRadius: 'var(--np-radius-sharp)',
-                cursor: 'pointer',
-                textAlign: 'left',
-                color: 'var(--np-fg)',
-                width: '100%',
-              }}
+              className="episode-row"
+              aria-label={`Play ${e.index !== null ? `episode ${e.index}, ` : ''}${e.title}${hasResume ? ` — resume from ${formatHms(resumePos)}` : ''}`}
             >
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ fontSize: '0.95rem' }}>
-                  {e.index !== null ? `${e.index}. ` : ''}
+              <span className="flex-1 min-w-0">
+                <span className="font-mono text-sm text-np-fg">
+                  {e.index !== null ? `${e.index}.\u00A0` : ''}
                   {e.title}
                 </span>
                 {e.summary ? (
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      color: 'var(--np-muted)',
-                      marginTop: '0.25rem',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
+                  <span className="block font-mono text-xs text-np-muted mt-0.5 truncate">
                     {e.summary}
                   </span>
                 ) : null}
               </span>
               {hasResume ? (
                 <span
-                  style={{
-                    fontSize: '0.7rem',
-                    fontFamily: 'var(--np-font-display)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    color: 'var(--np-green)',
-                    border: '1px solid var(--np-green)',
-                    padding: '0.15rem 0.4rem',
-                    borderRadius: 'var(--np-radius-sharp)',
-                    whiteSpace: 'nowrap',
-                  }}
+                  className="badge shrink-0"
+                  style={{ borderColor: 'var(--np-green)', color: 'var(--np-green)' }}
                 >
                   Resume
                 </span>
@@ -283,6 +267,8 @@ function Player({
   const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const resumeAppliedRef = useRef(false);
   const [resumeOffer, setResumeOffer] = useState<number | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   const hlsUrl = useMemo(() => {
     const base = `/api/hls/${linkId}/index.m3u8`;
@@ -296,6 +282,7 @@ function Player({
   useEffect(() => {
     resumeAppliedRef.current = false;
     setResumeOffer(null);
+    setVideoError(null);
     let cancelled = false;
     (async () => {
       try {
@@ -358,9 +345,7 @@ function Player({
 
     const saveProgress = async () => {
       const positionMs = Math.floor(video.currentTime * 1000);
-      const durationMs = Number.isFinite(video.duration)
-        ? Math.floor(video.duration * 1000)
-        : null;
+      const durationMs = Number.isFinite(video.duration) ? Math.floor(video.duration * 1000) : null;
       try {
         await fetch(`/api/hls/${linkId}/resume`, {
           method: 'POST',
@@ -396,6 +381,10 @@ function Player({
       }
     };
 
+    const onPlay = () => {
+      setIsBuffering(false);
+      startLoops();
+    };
     const onPause = () => {
       void saveProgress();
       stopLoops();
@@ -404,17 +393,29 @@ function Player({
       void saveProgress();
       stopLoops();
     };
+    const onWaiting = () => setIsBuffering(true);
+    const onCanPlay = () => setIsBuffering(false);
+    const onError = () => {
+      setVideoError('Playback error — try refreshing the page.');
+      stopLoops();
+    };
 
-    video.addEventListener('play', startLoops);
+    video.addEventListener('play', onPlay);
     video.addEventListener('pause', onPause);
     video.addEventListener('ended', onEnded);
+    video.addEventListener('waiting', onWaiting);
+    video.addEventListener('canplay', onCanPlay);
+    video.addEventListener('error', onError);
     const onPageHide = () => void saveProgress();
     window.addEventListener('pagehide', onPageHide);
 
     return () => {
-      video.removeEventListener('play', startLoops);
+      video.removeEventListener('play', onPlay);
       video.removeEventListener('pause', onPause);
       video.removeEventListener('ended', onEnded);
+      video.removeEventListener('waiting', onWaiting);
+      video.removeEventListener('canplay', onCanPlay);
+      video.removeEventListener('error', onError);
       window.removeEventListener('pagehide', onPageHide);
       stopLoops();
       void saveProgress();
@@ -443,98 +444,128 @@ function Player({
   const dismissResume = useCallback(() => setResumeOffer(null), []);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+    <div className="flex flex-col gap-3 animate-enter">
+      {/* Title + back nav */}
+      <div className="flex items-center gap-3 min-w-0">
         {onBack ? (
           <button
             type="button"
             onClick={onBack}
-            style={{
-              padding: '0.3rem 0.75rem',
-              background: 'transparent',
-              border: '1px solid var(--np-muted)',
-              borderRadius: 'var(--np-radius-sharp)',
-              color: 'var(--np-muted)',
-              cursor: 'pointer',
-              fontSize: '0.75rem',
-              fontFamily: 'var(--np-font-display)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-            }}
+            className="btn-ghost shrink-0"
+            aria-label="Back to episode list"
+            style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
           >
             ← Episodes
           </button>
         ) : null}
-        <h1
-          className="text-2xl font-display uppercase tracking-widest"
-          style={{ color: 'var(--np-cyan)', margin: 0 }}
-        >
+        <h1 className="font-display text-xl sm:text-2xl uppercase tracking-widest text-np-cyan truncate min-w-0">
           {title}
         </h1>
       </div>
+
+      {/* Resume offer */}
       {resumeOffer !== null ? (
         <div
+          className="flex items-center justify-between gap-3 p-3 rounded-sharp"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.5rem',
-            padding: '0.6rem 0.9rem',
-            background: 'rgba(0, 200, 150, 0.1)',
+            background: 'var(--np-green-subtle)',
             border: '1px solid var(--np-green)',
-            borderRadius: 'var(--np-radius-sharp)',
-            fontSize: '0.85rem',
           }}
+          role="region"
+          aria-label="Resume playback"
         >
-          <span>Resume from {formatHms(resumeOffer)}?</span>
-          <span style={{ display: 'flex', gap: '0.5rem' }}>
+          <span className="font-mono text-sm text-np-fg">
+            Resume from {formatHms(resumeOffer)}?
+          </span>
+          <span className="flex gap-2 shrink-0">
             <button
               type="button"
               onClick={acceptResume}
-              style={{
-                padding: '0.3rem 0.75rem',
-                background: 'var(--np-green)',
-                color: 'var(--np-bg)',
-                border: '1px solid var(--np-green)',
-                borderRadius: 'var(--np-radius-sharp)',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontFamily: 'var(--np-font-display)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-              }}
+              className="btn-primary"
+              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
             >
               Resume
             </button>
             <button
               type="button"
               onClick={dismissResume}
-              style={{
-                padding: '0.3rem 0.75rem',
-                background: 'transparent',
-                color: 'var(--np-muted)',
-                border: '1px solid var(--np-muted)',
-                borderRadius: 'var(--np-radius-sharp)',
-                cursor: 'pointer',
-                fontSize: '0.75rem',
-                fontFamily: 'var(--np-font-display)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-              }}
+              className="btn-ghost"
+              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
             >
               Start over
             </button>
           </span>
         </div>
       ) : null}
-      <video
-        ref={videoRef}
-        src={hlsUrl}
-        controls
-        playsInline
-        className="w-full rounded-sharp bg-black"
-        style={{ maxHeight: '70vh' }}
-      />
+
+      {/* Video wrapper with buffering indicator */}
+      <div className="relative w-full bg-black rounded-sharp overflow-hidden">
+        <video
+          ref={videoRef}
+          src={hlsUrl}
+          controls
+          playsInline
+          className="w-full rounded-sharp bg-black block"
+          style={{ maxHeight: '70vh' }}
+          aria-label={`Video player — ${title}`}
+        />
+        {/* Buffering overlay — shown during waiting events */}
+        {isBuffering ? (
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            aria-hidden="true"
+          >
+            <div className="flex items-center gap-1.5">
+              <span
+                className="inline-block w-2 h-2 rounded-full bg-np-cyan"
+                style={{ animation: 'np-breathe 1s ease-in-out 0ms infinite' }}
+              />
+              <span
+                className="inline-block w-2 h-2 rounded-full bg-np-cyan"
+                style={{ animation: 'np-breathe 1s ease-in-out 150ms infinite' }}
+              />
+              <span
+                className="inline-block w-2 h-2 rounded-full bg-np-cyan"
+                style={{ animation: 'np-breathe 1s ease-in-out 300ms infinite' }}
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Playback error */}
+      {videoError !== null ? (
+        <div
+          className="flex items-start gap-3 p-3 rounded-sharp"
+          style={{
+            background: 'var(--np-magenta-subtle, rgba(255,0,229,0.06))',
+            border: '1px solid var(--np-magenta)',
+          }}
+          role="alert"
+          aria-live="assertive"
+        >
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-np-magenta mt-0.5 shrink-0"
+          >
+            <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.2" />
+            <path
+              d="M8 4.5v4M8 10.5v.5"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+            />
+          </svg>
+          <p className="font-mono text-sm text-np-magenta">{videoError}</p>
+        </div>
+      ) : null}
+
+      {/* AirPlay hint — iOS Safari only */}
       <AirplayHint />
     </div>
   );

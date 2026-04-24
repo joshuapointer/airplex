@@ -68,4 +68,139 @@ body {
     border: 1px solid var(--np-border, rgba(255, 255, 255, 0.12));
     color: var(--np-fg);
   }
+
+  /* ── Recipient-flow safe-area wrappers ── */
+  .safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .safe-x {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  /* ── Recipient-flow animations ── */
+  .animate-enter {
+    animation: np-fade-in-up var(--np-duration-base) var(--np-ease-out) both;
+  }
+  .animate-enter-delay-1 {
+    animation: np-fade-in-up var(--np-duration-base) var(--np-ease-out) 80ms both;
+  }
+  .animate-enter-delay-2 {
+    animation: np-fade-in-up var(--np-duration-base) var(--np-ease-out) 160ms both;
+  }
+  .animate-enter-delay-3 {
+    animation: np-fade-in-up var(--np-duration-base) var(--np-ease-out) 240ms both;
+  }
+
+  /* ── Play button — oversized CTA for mobile tap targets ── */
+  .btn-play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    background: var(--np-green);
+    color: var(--np-bg);
+    font-family: var(--np-font-display);
+    font-size: 1.125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 1rem 2.5rem;
+    border-radius: var(--np-radius-sharp);
+    border: 1px solid var(--np-green);
+    cursor: pointer;
+    min-height: 56px;
+    box-shadow: var(--np-glow-green);
+    transition:
+      box-shadow var(--np-duration-fast) var(--np-ease-out),
+      transform var(--np-duration-fast) var(--np-ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-play:hover,
+  .btn-play:focus-visible {
+    box-shadow: var(--np-glow-green-strong);
+    transform: translateY(-1px);
+  }
+  .btn-play:active {
+    transform: translateY(0);
+    box-shadow: var(--np-glow-green);
+  }
+
+  /* ── Season selector tab ── */
+  .season-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    font-family: var(--np-font-display);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: transparent;
+    color: var(--np-muted);
+    border: 1px solid var(--np-border);
+    border-radius: var(--np-radius-sharp);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background var(--np-duration-fast) var(--np-ease-out),
+      color var(--np-duration-fast) var(--np-ease-out),
+      border-color var(--np-duration-fast) var(--np-ease-out);
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .season-tab[aria-selected='true'],
+  .season-tab.active {
+    background: var(--np-cyan);
+    color: var(--np-bg);
+    border-color: var(--np-cyan);
+  }
+
+  /* ── Episode row ── */
+  .episode-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--np-border);
+    border-radius: var(--np-radius-sharp);
+    cursor: pointer;
+    text-align: left;
+    color: var(--np-fg);
+    width: 100%;
+    min-height: 56px;
+    transition:
+      background var(--np-duration-fast) var(--np-ease-out),
+      border-color var(--np-duration-fast) var(--np-ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .episode-row:hover,
+  .episode-row:focus-visible {
+    background: rgba(0, 240, 255, 0.05);
+    border-color: var(--np-cyan-dim, rgba(0, 240, 255, 0.3));
+  }
+
+  /* ── AirPlay hint pill ── */
+  .airplay-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(0, 240, 255, 0.06);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: var(--np-radius-sharp);
+    font-family: var(--np-font-body);
+    font-size: 0.7rem;
+    color: var(--np-cyan);
+    cursor: pointer;
+    transition: opacity var(--np-duration-base) var(--np-ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .airplay-hint.dismissed {
+    opacity: 0;
+    pointer-events: none;
+  }
 }

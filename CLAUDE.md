@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+Prereq: Node 22+. For local dev, create `.env.local` with `APP_URL=http://localhost:3000` and `DATABASE_URL=file:./data/dev.db` (plus the three 32-byte secrets — `npm run gen-secrets`).
+
 - `npm run dev` — Next.js dev server on port 3000
 - `npm run build` — Next.js production build (standalone output)
 - `npm run start` — run built standalone server (`node .next/standalone/server.js`)
@@ -17,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-Next.js 15 App Router + React 19 + TypeScript strict. Single-process server, SQLite on disk (`better-sqlite3`, WAL, foreign_keys ON). Alias `@/*` → `src/*`. `output: 'standalone'` — Docker runtime copies `.next/standalone`, `.next/static`, `src/db/migrations/`, and `public/` only.
+Next.js 15 App Router + React 19 + TypeScript strict. Single-process server, SQLite on disk (`better-sqlite3`, WAL, foreign_keys ON). Alias `@/*` → `src/*`. `output: 'standalone'` — Docker runtime copies `.next/standalone`, `.next/static`, `src/db/migrations/`, and `public/` only. Styling: Tailwind + `neopointer-ui` design tokens (CSS-only). Logging: Pino at `LOG_LEVEL`. Rate limiter is in-memory/single-instance — horizontal scaling requires an external limiter.
 
 ### Request flow
 
@@ -56,7 +58,7 @@ SQLite only, file-based. `DATABASE_URL` must start with `file:`; special `file::
 ## Testing
 
 - **Unit (Vitest, `tests/unit/`)** — Node env, `tests/unit/setup.ts` preloads a dummy env. Covers share-token crypto, device-lock helpers, HLS rewriter round-trip + tamper rejection, Plex header injection, env validation, DB queries.
-- **Integration (Playwright, `tests/integration/`)** — no real OIDC or Plex. Server boots with `NODE_ENV=test` which enables `/api/test/_seed` for direct share-row seeding; integration then drives `/s/[token]` claim + second-device rejection. Runs serial (`workers: 1`), webServer on `:3100`, dummy 32-byte secrets in the Playwright config (never reuse).
+- **Integration (Playwright, `tests/integration/`)** — no real OIDC or Plex. Server boots with `NODE_ENV=test` which enables `/api/test/_seed` for direct share-row seeding; integration then drives `/s/[token]` claim + second-device rejection. Runs serial (`workers: 1`), webServer on `:3100`, dummy 32-byte secrets in the Playwright config (never reuse). New integration tests should `POST /api/test/_seed` to insert rows rather than driving the full admin OIDC flow.
 
 ## Conventions specific to this repo
 
@@ -66,3 +68,7 @@ SQLite only, file-based. `DATABASE_URL` must start with `file:`; special `file::
 - `NEXT_PUBLIC_*` is banned. All config is server-only.
 - All share pages + dashboard get `Referrer-Policy: no-referrer` and `frame-ancestors 'none'` at the `next.config.ts` headers layer AND in middleware (defense in depth).
 - `next-env.d.ts` is git-ignored from edits; `tsconfig.check.tsbuildinfo` / `tsconfig.tsbuildinfo` are build artifacts — don't commit edits to them.
+
+## Deployment
+
+Docker Compose is the primary deploy target (`docker-compose.yml`). Overlay `docker-compose.jarch.yml` wires Traefik labels for the jarch-bootstrap stack (requires external `jarch-public` network). Full provisioning via Ansible role in `ansible/` (see `ansible/README.md`); data dir owned by `1000:1000` to match container user.

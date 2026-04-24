@@ -86,10 +86,7 @@ async function claimAction(token: string): Promise<void> {
     cookieStore,
     ironConfigFor(row.id, ttlSeconds),
   );
-  if (
-    row.device_fingerprint_hash &&
-    existing.device_fp === row.device_fingerprint_hash
-  ) {
+  if (row.device_fingerprint_hash && existing.device_fp === row.device_fingerprint_hash) {
     redirect(`/s/${token}`);
   }
 
@@ -116,6 +113,16 @@ async function claimAction(token: string): Promise<void> {
     detail: { presented_fp: deviceFp },
   });
   redirect(`/s/${token}/claimed`);
+}
+
+/** Format remaining TTL as a human-friendly string, e.g. "47 hours" or "3 days". */
+function formatTtl(secondsRemaining: number): string {
+  const h = Math.floor(secondsRemaining / 3600);
+  const d = Math.floor(h / 24);
+  if (d >= 2) return `${d} days`;
+  if (h >= 1) return `${h} ${h === 1 ? 'hour' : 'hours'}`;
+  const m = Math.floor(secondsRemaining / 60);
+  return `${m} ${m === 1 ? 'minute' : 'minutes'}`;
 }
 
 export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
@@ -174,18 +181,20 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
 
   if (holdsLock) {
     return (
-      <main className="min-h-screen bg-np-bg text-np-fg p-4 sm:p-6">
-        <div className="max-w-5xl mx-auto">
-          <header className="mb-4 flex items-center justify-between">
+      <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <header className="mb-4 flex items-center justify-between animate-enter">
             <p className="text-np-green font-mono text-xs uppercase tracking-widest">airplex</p>
             <span className="badge">share</span>
           </header>
-          <ShareWatcher
-            linkId={row.id}
-            title={row.title}
-            mediaType={row.plex_media_type}
-            rootRatingKey={row.plex_rating_key}
-          />
+          <div className="animate-enter-delay-1">
+            <ShareWatcher
+              linkId={row.id}
+              title={row.title}
+              mediaType={row.plex_media_type}
+              rootRatingKey={row.plex_rating_key}
+            />
+          </div>
         </div>
       </main>
     );
@@ -195,38 +204,70 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   // disallows cookie mutation from Server Components; the claim must
   // happen in a Server Action triggered by the form submit.
   const boundClaim = claimAction.bind(null, token);
+  const ttlLabel = formatTtl(ttlSeconds);
 
   return (
-    <main className="min-h-screen bg-np-bg text-np-fg p-4 sm:p-6">
-      <div className="max-w-xl mx-auto pt-12">
-        <header className="mb-6 flex items-center justify-between">
+    <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x flex flex-col">
+      <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-4 sm:px-6 py-10">
+        {/* Brand mark */}
+        <header className="mb-8 flex items-center justify-between animate-enter">
           <p className="text-np-green font-mono text-xs uppercase tracking-widest">airplex</p>
           <span className="badge">share</span>
         </header>
-        <h1 className="font-display text-2xl sm:text-3xl uppercase tracking-wide mb-2 text-np-fg">
+
+        {/* Title */}
+        <h1 className="font-display text-4xl sm:text-5xl uppercase tracking-wide mb-3 text-np-fg leading-tight animate-enter-delay-1">
           {row.title}
         </h1>
-        <p className="text-np-muted text-sm mb-8">
-          Shared with {row.recipient_label}. Tap start to open the stream. This link locks to
-          the first device that starts it.
-        </p>
-        <form action={boundClaim}>
+
+        {/* Recipient + TTL context */}
+        <div className="flex flex-col gap-1.5 mb-10 animate-enter-delay-2">
+          <p className="text-np-muted font-mono text-sm">
+            Shared with <span className="text-np-cyan">{row.recipient_label}</span>
+          </p>
+          <p className="text-np-muted font-mono text-xs flex items-center gap-1.5">
+            {/* Clock icon */}
+            <svg
+              aria-hidden="true"
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1" />
+              <path
+                d="M6 3.5V6.5L8 7.5"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+              />
+            </svg>
+            Available for the next <span className="text-np-fg">{ttlLabel}</span>
+          </p>
+          <p className="text-np-muted font-mono text-xs" style={{ color: 'var(--np-text-faint)' }}>
+            This link locks to the first device that opens it.
+          </p>
+        </div>
+
+        {/* CTA */}
+        <form action={boundClaim} className="animate-enter-delay-3">
           <button
             type="submit"
-            className="btn btn-primary"
-            style={{
-              padding: '0.75rem 2rem',
-              background: 'var(--np-green)',
-              color: 'var(--np-bg)',
-              fontFamily: 'var(--np-font-display)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              border: '1px solid var(--np-green)',
-              borderRadius: 'var(--np-radius-sharp)',
-              fontSize: '0.95rem',
-              cursor: 'pointer',
-            }}
+            className="btn-play w-full sm:w-auto"
+            aria-label={`Start streaming ${row.title}`}
           >
+            {/* Play triangle */}
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M3 2.5L13 8L3 13.5V2.5Z" />
+            </svg>
             Start streaming
           </button>
         </form>
