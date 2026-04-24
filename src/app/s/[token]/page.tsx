@@ -6,11 +6,10 @@ import { getIronSession } from 'iron-session';
 import { ShareWatcher } from '@/components/player/ShareWatcher';
 import {
   AmbientBackdrop,
+  ClaimForm,
   FrameBrackets,
-  PlayButton,
   PosterCard,
   TypewriterTitle,
-  armCurtainOnSubmit,
 } from '@/components/ui/transmission';
 import { logEvent } from '@/db/queries/events';
 import {
@@ -255,25 +254,23 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
               />
 
               {/* CTA */}
-              <form
+              <ClaimForm
                 action={boundClaim}
-                onSubmit={armCurtainOnSubmit}
+                ariaLabel={`Start streaming ${row.title}`}
                 className="w-full animate-enter-delay-3"
               >
-                <PlayButton formAction={boundClaim} aria-label={`Start streaming ${row.title}`}>
-                  <svg
-                    aria-hidden="true"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M3 2.5L13 8L3 13.5V2.5Z" />
-                  </svg>
-                  Start streaming
-                </PlayButton>
-              </form>
+                <svg
+                  aria-hidden="true"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M3 2.5L13 8L3 13.5V2.5Z" />
+                </svg>
+                Start streaming
+              </ClaimForm>
             </div>
           </div>
 

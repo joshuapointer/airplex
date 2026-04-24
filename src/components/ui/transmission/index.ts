@@ -29,3 +29,6 @@ export type { PlayButtonProps } from './PlayButton';
 export { playCueAudio } from './playCueAudio';
 
 export { armCurtainOnSubmit } from './CurtainTransition';
+
+export { ClaimForm } from './ClaimForm';
+export type { ClaimFormProps } from './ClaimForm';
