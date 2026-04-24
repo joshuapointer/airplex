@@ -1,0 +1,447 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1776997407216,
+  "projectRoot": "/home/joshpointer/developer/airplex",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "15.0.0",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.0.0",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.0.0",
+        "category": "frontend"
+      },
+      {
+        "name": "@playwright/test",
+        "version": "1.45.0",
+        "category": "testing"
+      },
+      {
+        "name": "vitest",
+        "version": "2.0.0",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev -p 3000",
+      "build": "next build",
+      "start": "node .next/standalone/server.js",
+      "typecheck": "tsc --noEmit",
+      "lint": "next lint && prettier --check .",
+      "test:unit": "vitest run tests/unit",
+      "test:integration": "playwright test",
+      "gen-secrets": "tsx scripts/gen-secrets.ts"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "scripts",
+      "src",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "ansible": {
+      "path": "ansible",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1776997407205,
+      "keyFiles": [
+        "README.md",
+        "inventory.example.ini",
+        "requirements.yml",
+        "site.yml"
+      ]
+    },
+    "docker": {
+      "path": "docker",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1776997407205,
+      "keyFiles": [
+        "entrypoint.sh"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 2,
+      "lastAccessed": 1776997407211,
+      "keyFiles": [
+        "gen-secrets.ts",
+        "smoke.ts"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1776997407213,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1776997407213,
+      "keyFiles": []
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 3,
+      "lastAccessed": 1776997407214,
+      "keyFiles": [
+        "globals.css",
+        "layout.tsx",
+        "page.tsx"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 0,
+      "lastAccessed": 1776997407214,
+      "keyFiles": []
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 8,
+      "lastAccessed": 1776997407214,
+      "keyFiles": [
+        "csrf.ts",
+        "device-lock.ts",
+        "env.ts"
+      ]
+    },
+    "src/types": {
+      "path": "src/types",
+      "purpose": "Type definitions",
+      "fileCount": 2,
+      "lastAccessed": 1776997407214,
+      "keyFiles": [
+        "plex.d.ts",
+        "share.d.ts"
+      ]
+    },
+    "tests/fixtures": {
+      "path": "tests/fixtures",
+      "purpose": "Test fixtures",
+      "fileCount": 2,
+      "lastAccessed": 1776997407215,
+      "keyFiles": [
+        "plex-master.m3u8",
+        "plex-media.m3u8"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/app/setup/plex/PlexSetupClient.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1777001963425,
+      "type": "file"
+    },
+    {
+      "path": "docker/entrypoint.sh",
+      "accessCount": 2,
+      "lastAccessed": 1776998665078,
+      "type": "file"
+    },
+    {
+      "path": "Dockerfile",
+      "accessCount": 2,
+      "lastAccessed": 1776998673140,
+      "type": "file"
+    },
+    {
+      "path": "tsconfig.json",
+      "accessCount": 2,
+      "lastAccessed": 1776998834186,
+      "type": "file"
+    },
+    {
+      "path": "ansible/roles/airplex/templates/docker-compose.yml.j2",
+      "accessCount": 2,
+      "lastAccessed": 1776998901111,
+      "type": "file"
+    },
+    {
+      "path": "src/middleware.ts",
+      "accessCount": 2,
+      "lastAccessed": 1776998987783,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1776997438527,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1776997438865,
+      "type": "file"
+    },
+    {
+      "path": "next.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997439307,
+      "type": "file"
+    },
+    {
+      "path": "middleware.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997439646,
+      "type": "file"
+    },
+    {
+      "path": "vitest.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997440434,
+      "type": "file"
+    },
+    {
+      "path": "playwright.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997440815,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.yml",
+      "accessCount": 1,
+      "lastAccessed": 1776997441574,
+      "type": "file"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "accessCount": 1,
+      "lastAccessed": 1776997442014,
+      "type": "file"
+    },
+    {
+      "path": "src/db/client.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997449965,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/env.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997450337,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/share-token.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997450736,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/device-lock.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997451117,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/hls-rewriter.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997451941,
+      "type": "file"
+    },
+    {
+      "path": "src/db/migrate.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997452348,
+      "type": "file"
+    },
+    {
+      "path": "src/auth/oidc.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997452640,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/session.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776997453013,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1776997508418,
+      "type": "file"
+    },
+    {
+      "path": "ansible/README.md",
+      "accessCount": 1,
+      "lastAccessed": 1776997753297,
+      "type": "file"
+    },
+    {
+      "path": "ansible/site.yml",
+      "accessCount": 1,
+      "lastAccessed": 1776997753741,
+      "type": "file"
+    },
+    {
+      "path": "ansible/inventory.example.ini",
+      "accessCount": 1,
+      "lastAccessed": 1776997754538,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/setup",
+      "accessCount": 1,
+      "lastAccessed": 1776998151746,
+      "type": "directory"
+    },
+    {
+      "path": "src/app/api/setup/plex/start/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776998152023,
+      "type": "file"
+    },
+    {
+      "path": "ansible/roles/airplex/defaults/main.yml",
+      "accessCount": 1,
+      "lastAccessed": 1776998182599,
+      "type": "file"
+    },
+    {
+      "path": "ansible/roles/airplex/templates/env.j2",
+      "accessCount": 1,
+      "lastAccessed": 1776998183702,
+      "type": "file"
+    },
+    {
+      "path": "ansible/roles/airplex/tasks/main.yml",
+      "accessCount": 1,
+      "lastAccessed": 1776998186997,
+      "type": "file"
+    },
+    {
+      "path": "ansible/roles/airplex/tasks/40-launch.yml",
+      "accessCount": 1,
+      "lastAccessed": 1776998187251,
+      "type": "file"
+    },
+    {
+      "path": "ansible/roles/airplex/tasks/00-preflight.yml",
+      "accessCount": 1,
+      "lastAccessed": 1776998187316,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1776998590540,
+      "type": "directory"
+    },
+    {
+      "path": "scripts/migrate-runtime.cjs",
+      "accessCount": 1,
+      "lastAccessed": 1776998658070,
+      "type": "file"
+    },
+    {
+      "path": "src/app/dashboard/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776998691345,
+      "type": "file"
+    },
+    {
+      "path": "src/auth/guards.ts",
+      "accessCount": 1,
+      "lastAccessed": 1776998691758,
+      "type": "file"
+    },
+    {
+      "path": "src/app/dashboard/layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776998769978,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/setup/plex/callback/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777001551337,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/account.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777001551567,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777002323032,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/setup/plex/servers/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777002330286,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/setup/plex/select/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777002330489,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

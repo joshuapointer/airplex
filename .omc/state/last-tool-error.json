@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"TOKEN=SdnWcxGDmXuahhPSsHLx\\ncurl -s -H \\\"X-Plex-Token: $TOKEN\\\" -H 'X-Plex-Client-Identifier: airplex-stream-joshpointer-dev' -H 'Accept: application/json' 'https://plex.tv/api/v2/resource...",
+  "error": "Exit code 1\n  File \"<string>\", line 7\n    print(f\"  local={c.get(\\\"local\\\")} relay={c.get(\\\"relay\\\")} ipv6={c.get(\\\"IPv6\\\",c.get(\\\"ipv6\\\"))} uri={c.get(\\\"uri\\\")}\")\n                            ^\nSyntaxError: unexpected character after line continuation character",
+  "timestamp": "2026-04-24T03:44:58.967Z",
+  "retry_count": 1
+}

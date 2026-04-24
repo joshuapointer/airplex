@@ -85,6 +85,16 @@ COPY --from=build /app/public ./public
 # so migrate.ts can resolve them via process.cwd() at runtime.
 COPY --from=build /app/src/db/migrations ./src/db/migrations
 
+# Runtime migration script invoked by entrypoint.sh before the server starts.
+COPY --from=build /app/scripts/migrate-runtime.cjs ./scripts/migrate-runtime.cjs
+
+# better-sqlite3 native addon is needed at runtime for the migration script
+# (standalone server bundles its own copy but the migrate script requires
+# the top-level node_modules entry for resolution).
+COPY --from=build /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY --from=build /app/node_modules/bindings ./node_modules/bindings
+COPY --from=build /app/node_modules/file-uri-to-path ./node_modules/file-uri-to-path
+
 # Persistent data directory — owned by node (uid/gid 1000) so SQLite can
 # write to it at runtime. The entrypoint shim re-chowns on bind-mount start
 # when the host directory is root-owned.

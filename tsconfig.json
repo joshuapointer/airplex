@@ -22,7 +22,6 @@
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "middleware.ts",
     "scripts/**/*.ts",
     "tests/**/*.ts",
     ".next/types/**/*.ts"

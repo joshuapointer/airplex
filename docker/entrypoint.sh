@@ -7,4 +7,8 @@ if [ "$(id -u)" = "0" ] && [ -w /data ]; then
   chown -R 1000:1000 /data
 fi
 
+# Apply any pending migrations before starting the server. Runs as the node
+# user so the resulting SQLite files are owned correctly.
+su-exec node node /app/scripts/migrate-runtime.cjs
+
 exec su-exec node tini -- "$@"

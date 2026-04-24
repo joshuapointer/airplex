@@ -26,12 +26,17 @@ export function PlexSetupClient({
     try {
       // Create the PIN from the browser so plex.tv sees the user's IP,
       // not the server's datacenter IP (which triggers a security alert).
-      const pinRes = await fetch('https://plex.tv/api/v2/pins', {
+      const pinRes = await fetch('https://plex.tv/api/v2/pins?strong=true', {
         method: 'POST',
         headers: {
-          strong: 'true',
           'X-Plex-Product': 'airplex',
           'X-Plex-Client-Identifier': plexClientId,
+          'X-Plex-Version': '1.0',
+          'X-Plex-Platform': 'Web',
+          'X-Plex-Platform-Version': '1.0',
+          'X-Plex-Device': 'airplex',
+          'X-Plex-Device-Name': 'airplex',
+          'X-Plex-Model': 'hosted',
           Accept: 'application/json',
           'Content-Length': '0',
         },
@@ -50,13 +55,19 @@ export function PlexSetupClient({
         throw new Error(json.error ?? `HTTP ${r.status}`);
       }
 
-      const params = [
-        `clientID=${encodeURIComponent(plexClientId)}`,
-        `code=${encodeURIComponent(pin.code)}`,
-        `context[device][product]=airplex`,
-        `forwardUrl=${encodeURIComponent(window.location.origin + '/api/setup/plex/callback')}`,
-      ].join('&');
-      window.location.href = `https://app.plex.tv/auth#?${params}`;
+      const params = new URLSearchParams({
+        clientID: plexClientId,
+        code: pin.code,
+        'context[device][product]': 'airplex',
+        'context[device][version]': '1.0',
+        'context[device][platform]': 'Web',
+        'context[device][platformVersion]': '1.0',
+        'context[device][device]': 'airplex',
+        'context[device][deviceName]': 'airplex',
+        'context[device][model]': 'hosted',
+        forwardUrl: window.location.origin + '/api/setup/plex/callback',
+      });
+      window.location.href = `https://app.plex.tv/auth#?${params.toString()}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start Plex sign-in.');
       setBusy(false);

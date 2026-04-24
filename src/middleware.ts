@@ -78,11 +78,13 @@ export function middleware(request: NextRequest): NextResponse {
 
   const isDashboard = pathname.startsWith('/dashboard');
   const isAdminApi = pathname.startsWith('/api/admin');
+  const isSetup = pathname.startsWith('/setup/') || pathname === '/setup';
+  const isSetupApi = pathname.startsWith('/api/setup/');
   const isHls = pathname.startsWith('/api/hls');
   const isShare = pathname.startsWith('/s/') || pathname === '/s';
 
   // 1. Auth-gate admin surfaces.
-  if (isDashboard || isAdminApi) {
+  if (isDashboard || isAdminApi || isSetup || isSetupApi) {
     const hasSession = request.cookies.has(ADMIN_SESSION_COOKIE);
     if (!hasSession) {
       return redirectToLogin(request);
