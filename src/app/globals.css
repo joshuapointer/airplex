@@ -41,6 +41,11 @@ body {
     border-radius: var(--np-radius-sharp);
     border: 1px solid var(--np-green);
     cursor: pointer;
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
   }
 
   .btn-ghost {
@@ -56,6 +61,11 @@ body {
     border-radius: var(--np-radius-sharp);
     border: 1px solid var(--np-border, rgba(255, 255, 255, 0.12));
     cursor: pointer;
+    transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-ghost:active {
+    transform: scale(0.97);
   }
 
   .badge {
@@ -114,17 +124,22 @@ body {
     min-height: 56px;
     box-shadow: var(--np-glow-green);
     transition:
-      box-shadow var(--np-duration-fast) var(--np-ease-out),
-      transform var(--np-duration-fast) var(--np-ease-out);
+      box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
     -webkit-tap-highlight-color: transparent;
   }
-  .btn-play:hover,
   .btn-play:focus-visible {
     box-shadow: var(--np-glow-green-strong);
     transform: translateY(-1px);
   }
+  @media (hover: hover) and (pointer: fine) {
+    .btn-play:hover {
+      box-shadow: var(--np-glow-green-strong);
+      transform: translateY(-1px);
+    }
+  }
   .btn-play:active {
-    transform: translateY(0);
+    transform: scale(0.97);
     box-shadow: var(--np-glow-green);
   }
 
@@ -144,9 +159,10 @@ body {
     cursor: pointer;
     white-space: nowrap;
     transition:
-      background var(--np-duration-fast) var(--np-ease-out),
-      color var(--np-duration-fast) var(--np-ease-out),
-      border-color var(--np-duration-fast) var(--np-ease-out);
+      background 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
     min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
@@ -155,6 +171,9 @@ body {
     background: var(--np-cyan);
     color: var(--np-bg);
     border-color: var(--np-cyan);
+  }
+  .season-tab:active {
+    transform: scale(0.97);
   }
 
   /* ── Episode row ── */
@@ -173,14 +192,23 @@ body {
     width: 100%;
     min-height: 56px;
     transition:
-      background var(--np-duration-fast) var(--np-ease-out),
-      border-color var(--np-duration-fast) var(--np-ease-out);
+      background 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      border-color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
     -webkit-tap-highlight-color: transparent;
   }
-  .episode-row:hover,
   .episode-row:focus-visible {
     background: rgba(0, 240, 255, 0.05);
     border-color: var(--np-cyan-dim, rgba(0, 240, 255, 0.3));
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .episode-row:hover {
+      background: rgba(0, 240, 255, 0.05);
+      border-color: var(--np-cyan-dim, rgba(0, 240, 255, 0.3));
+    }
+  }
+  .episode-row:active {
+    transform: scale(0.99);
   }
 
   /* ── AirPlay hint pill ── */
@@ -196,11 +224,107 @@ body {
     font-size: 0.7rem;
     color: var(--np-cyan);
     cursor: pointer;
-    transition: opacity var(--np-duration-base) var(--np-ease-out);
+    animation: np-pop-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    transition:
+      opacity 220ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
     -webkit-tap-highlight-color: transparent;
+  }
+  .airplay-hint:active {
+    transform: scale(0.97);
   }
   .airplay-hint.dismissed {
     opacity: 0;
+    transform: scale(0.97);
     pointer-events: none;
+  }
+
+  /* ── Resume offer banner ── */
+  .resume-banner {
+    animation: np-pop-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    transform-origin: top center;
+  }
+
+  /* ── Buffering overlay fade ── */
+  .buffering-overlay {
+    opacity: 0;
+    transition: opacity 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .buffering-overlay[data-active='true'] {
+    opacity: 1;
+  }
+
+  /* ── Ken Burns backdrop ── */
+  .backdrop-kenburns {
+    animation: np-kenburns 24s linear infinite alternate;
+  }
+
+  /* ── Poster thumbnail ── */
+  .poster-thumb {
+    transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+    transform-origin: bottom left;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .poster-thumb:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+@keyframes np-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes np-kenburns {
+  from {
+    transform: scale(1.15);
+  }
+  to {
+    transform: scale(1.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter,
+  .animate-enter-delay-1,
+  .animate-enter-delay-2,
+  .animate-enter-delay-3,
+  .airplay-hint,
+  .resume-banner {
+    animation: np-fade-only 200ms ease both;
+  }
+  .backdrop-kenburns {
+    animation: none;
+  }
+  .btn-play:focus-visible,
+  .btn-play:hover {
+    transform: none;
+  }
+  .btn-play:active,
+  .btn-primary:active,
+  .btn-ghost:active,
+  .season-tab:active,
+  .episode-row:active,
+  .airplay-hint:active {
+    transform: none;
+  }
+  .poster-thumb:hover {
+    transform: none;
+  }
+}
+
+@keyframes np-fade-only {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

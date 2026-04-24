@@ -214,14 +214,13 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
       {posterSrc ? (
         <div
           aria-hidden="true"
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none backdrop-kenburns"
           style={{
             backgroundImage: `url(${posterSrc})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             filter: 'blur(40px) saturate(1.1)',
             opacity: 0.25,
-            transform: 'scale(1.15)',
           }}
         />
       ) : null}
@@ -249,7 +248,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
               width={120}
               height={180}
               loading="eager"
-              className="rounded-sharp"
+              className="rounded-sharp poster-thumb"
               style={{
                 width: '120px',
                 height: '180px',

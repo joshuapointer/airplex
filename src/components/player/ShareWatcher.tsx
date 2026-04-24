@@ -477,7 +477,7 @@ function Player({
       {/* Resume offer */}
       {resumeOffer !== null ? (
         <div
-          className="flex items-center justify-between gap-3 p-3 rounded-sharp"
+          className="resume-banner flex items-center justify-between gap-3 p-3 rounded-sharp"
           style={{
             background: 'var(--np-green-subtle)',
             border: '1px solid var(--np-green)',
@@ -520,28 +520,27 @@ function Player({
           style={{ maxHeight: '70vh' }}
           aria-label={`Video player — ${title}`}
         />
-        {/* Buffering overlay — shown during waiting events */}
-        {isBuffering ? (
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            aria-hidden="true"
-          >
-            <div className="flex items-center gap-1.5">
-              <span
-                className="inline-block w-2 h-2 rounded-full bg-np-cyan"
-                style={{ animation: 'np-breathe 1s ease-in-out 0ms infinite' }}
-              />
-              <span
-                className="inline-block w-2 h-2 rounded-full bg-np-cyan"
-                style={{ animation: 'np-breathe 1s ease-in-out 150ms infinite' }}
-              />
-              <span
-                className="inline-block w-2 h-2 rounded-full bg-np-cyan"
-                style={{ animation: 'np-breathe 1s ease-in-out 300ms infinite' }}
-              />
-            </div>
+        {/* Buffering overlay — kept mounted; opacity fades on data-active for smooth fade in/out */}
+        <div
+          className="buffering-overlay absolute inset-0 flex items-center justify-center pointer-events-none"
+          data-active={isBuffering}
+          aria-hidden="true"
+        >
+          <div className="flex items-center gap-1.5">
+            <span
+              className="inline-block w-2 h-2 rounded-full bg-np-cyan"
+              style={{ animation: 'np-breathe 1s ease-in-out 0ms infinite' }}
+            />
+            <span
+              className="inline-block w-2 h-2 rounded-full bg-np-cyan"
+              style={{ animation: 'np-breathe 1s ease-in-out 150ms infinite' }}
+            />
+            <span
+              className="inline-block w-2 h-2 rounded-full bg-np-cyan"
+              style={{ animation: 'np-breathe 1s ease-in-out 300ms infinite' }}
+            />
           </div>
-        ) : null}
+        </div>
       </div>
 
       {/* Playback error */}
