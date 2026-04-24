@@ -23,7 +23,7 @@ const TOTAL_COLS = 7;
 
 function statusOf(row: ShareRow, now: number): ShareStatus {
   const revoked = row.revoked_at !== null;
-  const expired = row.expires_at <= now;
+  const expired = row.expires_at !== null && row.expires_at <= now;
   const exhausted = row.max_plays !== null && row.play_count >= row.max_plays;
   const claimed = row.device_fingerprint_hash !== null;
   const active = !revoked && !expired && !exhausted;
@@ -138,7 +138,7 @@ function ShareListInner({ shares }: ShareListProps) {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex flex-col gap-1">
-                      <span>{formatDate(row.expires_at)}</span>
+                      <span>{row.expires_at === null ? 'Never' : formatDate(row.expires_at)}</span>
                       <TtlHairline
                         createdAt={row.created_at}
                         expiresAt={row.expires_at}

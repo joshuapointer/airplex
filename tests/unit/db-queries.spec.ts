@@ -264,4 +264,28 @@ describe('db-queries: computeShareStatus', () => {
     const status = computeShareStatus(row, NOW);
     expect(status.exhausted).toBe(false);
   });
+
+  it('null expires_at is never expired (active forever)', () => {
+    const row = makeFakeShareRow({
+      expires_at: null,
+      revoked_at: null,
+      max_plays: null,
+      play_count: 0,
+    });
+    // Even far in the future, status must report active=true.
+    const farFuture = NOW + 100 * 365 * 86400;
+    const status = computeShareStatus(row, farFuture);
+    expect(status.expired).toBe(false);
+    expect(status.active).toBe(true);
+  });
+
+  it('insertShare round-trips null expires_at', () => {
+    const row = makeFakeShareRow({
+      id: `never-${Date.now()}`,
+      expires_at: null,
+    });
+    insertShare(row);
+    const fetched = getShareById(row.id)!;
+    expect(fetched.expires_at).toBeNull();
+  });
 });

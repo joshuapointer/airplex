@@ -15,7 +15,7 @@ export interface ShareRow {
   sender_label: string | null;
   poster_path: string | null;
   created_at: number; // unix seconds
-  expires_at: number;
+  expires_at: number | null; // null = never expires
   max_plays: number | null;
   play_count: number;
   device_fingerprint_hash: string | null;

@@ -20,9 +20,7 @@ function stmts() {
   if (_stmts) return _stmts;
   const db = getDb();
   _stmts = {
-    get: db.prepare(
-      'SELECT * FROM resume_positions WHERE share_id = ? AND rating_key = ?',
-    ),
+    get: db.prepare('SELECT * FROM resume_positions WHERE share_id = ? AND rating_key = ?'),
     upsert: db.prepare(
       'INSERT INTO resume_positions (share_id, rating_key, position_ms, duration_ms, updated_at)\n' +
         '  VALUES (?, ?, ?, ?, ?)\n' +
@@ -34,9 +32,7 @@ function stmts() {
     listByShare: db.prepare(
       'SELECT * FROM resume_positions WHERE share_id = ? ORDER BY updated_at DESC',
     ),
-    clear: db.prepare(
-      'DELETE FROM resume_positions WHERE share_id = ? AND rating_key = ?',
-    ),
+    clear: db.prepare('DELETE FROM resume_positions WHERE share_id = ? AND rating_key = ?'),
   };
   return _stmts;
 }
@@ -45,13 +41,8 @@ export function __resetResumeStmtsForTests(): void {
   _stmts = null;
 }
 
-export function getResumePosition(
-  shareId: string,
-  ratingKey: string,
-): ResumePositionRow | null {
-  return (
-    (stmts().get.get(shareId, ratingKey) as ResumePositionRow | undefined) ?? null
-  );
+export function getResumePosition(shareId: string, ratingKey: string): ResumePositionRow | null {
+  return (stmts().get.get(shareId, ratingKey) as ResumePositionRow | undefined) ?? null;
 }
 
 export function saveResumePosition(

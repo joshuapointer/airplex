@@ -38,7 +38,7 @@ export function NowLiveStrip({
   return (
     <nav aria-label="Active shares" className="now-live-strip">
       {visible.map((share) => {
-        const ttlLabel = formatTtlShort(share.expires_at - now);
+        const ttlLabel = formatTtlShort(share.expires_at === null ? null : share.expires_at - now);
         const live = Boolean(liveMap[share.id]);
         const posterUrl = share.poster_path ? `/api/admin/shares/${share.id}/poster` : null;
         return (

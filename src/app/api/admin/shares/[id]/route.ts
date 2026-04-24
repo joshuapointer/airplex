@@ -37,7 +37,11 @@ const patchBody = z.discriminatedUnion('action', [
   z.object({ action: z.literal('reset_device') }),
   z.object({
     action: z.literal('extend'),
-    ttl_hours: z.coerce.number().int().min(1).max(env.SHARE_MAX_TTL_HOURS),
+    // null = clear the expiry (never expires). A number extends by that many hours.
+    ttl_hours: z.union([
+      z.literal(null),
+      z.coerce.number().int().min(1).max(env.SHARE_MAX_TTL_HOURS),
+    ]),
   }),
 ]);
 
@@ -130,7 +134,7 @@ export async function PATCH(
   // variant. Per task instructions, reuse `'reset'` with a detail payload
   // rather than modifying B1's type. Flagged as an open question.
   const now = Math.floor(Date.now() / 1000);
-  const newExpiresAt = now + body.ttl_hours * 3600;
+  const newExpiresAt = body.ttl_hours === null ? null : now + body.ttl_hours * 3600;
   extendShare(id, newExpiresAt);
   logEvent({
     share_id: id,

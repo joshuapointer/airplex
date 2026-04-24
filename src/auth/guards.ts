@@ -62,7 +62,9 @@ export async function requireShareAccess(req: Request, linkId: string): Promise<
 
   if (row.device_fingerprint_hash) {
     const now = Math.floor(Date.now() / 1000);
-    const ttlSeconds = Math.max(60, row.expires_at - now);
+    // Null expires_at = never-expires share; cap the cookie at 30d so the
+    // session cookie still rotates periodically.
+    const ttlSeconds = row.expires_at === null ? 30 * 86400 : Math.max(60, row.expires_at - now);
     const cookieStore = await cookies();
     const deviceSession = await getIronSession<DeviceLockCookiePayload>(
       cookieStore,

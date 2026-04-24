@@ -107,7 +107,7 @@ export function ShareCard({ share, status }: ShareCardProps) {
             <Dd>{formatDate(share.created_at)}</Dd>
 
             <Dt>Expires</Dt>
-            <Dd>{formatDate(share.expires_at)}</Dd>
+            <Dd>{share.expires_at === null ? 'Never' : formatDate(share.expires_at)}</Dd>
 
             <Dt>Plays</Dt>
             <Dd>

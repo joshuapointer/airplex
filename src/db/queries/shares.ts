@@ -17,7 +17,7 @@ let _stmts: {
       string | null, // sender_label
       string | null, // poster_path
       number, // created_at
-      number, // expires_at
+      number | null, // expires_at (null = never)
       number | null, // max_plays
       number, // play_count
       string | null, // device_fingerprint_hash
@@ -32,7 +32,7 @@ let _stmts: {
   claimDevice: Database.Statement<[string, number, string]>;
   resetDevice: Database.Statement<[string]>;
   revokeShare: Database.Statement<[number, string]>;
-  extendShare: Database.Statement<[number, string]>;
+  extendShare: Database.Statement<[number | null, string]>;
   incrementPlayCount: Database.Statement<[string]>;
   pickAmbientActive: Database.Statement<[number], ShareRow>;
 } | null = null;
@@ -68,8 +68,10 @@ function stmts() {
     incrementPlayCount: db.prepare('UPDATE shares SET play_count = play_count + 1 WHERE id = ?'),
     pickAmbientActive: db.prepare(
       'SELECT * FROM shares\n' +
-        '  WHERE revoked_at IS NULL AND expires_at > ? AND poster_path IS NOT NULL\n' +
-        '  ORDER BY expires_at ASC LIMIT 1',
+        '  WHERE revoked_at IS NULL\n' +
+        '    AND (expires_at IS NULL OR expires_at > ?)\n' +
+        '    AND poster_path IS NOT NULL\n' +
+        '  ORDER BY (expires_at IS NULL), expires_at ASC LIMIT 1',
     ),
   };
   return _stmts;
@@ -149,7 +151,7 @@ export function revokeShare(id: string): void {
   stmts().revokeShare.run(now, id);
 }
 
-export function extendShare(id: string, newExpiresAt: number): void {
+export function extendShare(id: string, newExpiresAt: number | null): void {
   stmts().extendShare.run(newExpiresAt, id);
 }
 
@@ -174,7 +176,8 @@ export function pickAmbientShare(now?: number): ShareRow | null {
 export function computeShareStatus(row: ShareRow, now?: number): ShareStatus {
   const t = now ?? Math.floor(Date.now() / 1000);
   const revoked = row.revoked_at !== null;
-  const expired = row.expires_at <= t;
+  // null expires_at = never expires
+  const expired = row.expires_at !== null && row.expires_at <= t;
   const exhausted = row.max_plays !== null && row.play_count >= row.max_plays;
   const claimed = row.device_fingerprint_hash !== null;
   const active = !revoked && !expired && !exhausted;

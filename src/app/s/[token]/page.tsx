@@ -3,7 +3,7 @@ import { cookies, headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { getIronSession } from 'iron-session';
 
-import { ShareWatcher } from '@/components/player/ShareWatcher';
+import { ClaimedShareView } from '@/components/player/ClaimedShareView';
 import {
   AmbientBackdrop,
   ClaimForm,
@@ -12,6 +12,7 @@ import {
   TypewriterTitle,
 } from '@/components/ui/transmission';
 import { logEvent } from '@/db/queries/events';
+import { listResumePositions } from '@/db/queries/resume';
 import {
   claimDevice,
   computeShareStatus,
@@ -22,6 +23,25 @@ import { computeDeviceFp, ironConfigFor, type DeviceLockCookiePayload } from '@/
 import { buildShareMetadata } from '@/lib/share-metadata';
 import { hashShareToken, verifyShareTokenSignature } from '@/lib/share-token';
 import { formatTtlLong } from '@/lib/ttl';
+
+// Must match the thresholds in ShareWatcher/Player so the hero CTA reflects
+// whether the player will actually seek into a resumable position.
+const RESUME_THRESHOLD_MS = 20_000;
+const NEAR_END_MS = 60_000;
+
+/**
+ * Does this share have any resumable playback? Used purely for the hero CTA
+ * label ("Watch" vs "Continue watching").
+ */
+function hasResumablePosition(shareId: string): boolean {
+  const rows = listResumePositions(shareId);
+  for (const r of rows) {
+    if (r.position_ms < RESUME_THRESHOLD_MS) continue;
+    if (r.duration_ms !== null && r.duration_ms - r.position_ms < NEAR_END_MS) continue;
+    return true;
+  }
+  return false;
+}
 
 /**
  * Link-preview / unfurl bots that hit share URLs when they're pasted into
@@ -90,7 +110,9 @@ async function claimAction(token: string): Promise<void> {
   const deviceFp = computeDeviceFp(ua, acceptLang);
 
   const now = Math.floor(Date.now() / 1000);
-  const ttlSeconds = Math.max(60, row.expires_at - now);
+  // Null expires_at = never expires; cap the device cookie at 30d so it
+  // still rotates periodically.
+  const ttlSeconds = row.expires_at === null ? 30 * 86400 : Math.max(60, row.expires_at - now);
 
   // If we already hold the cookie for this link, nothing to do — re-render.
   const cookieStore = await cookies();
@@ -163,7 +185,9 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const ttlSeconds = Math.max(60, row.expires_at - now);
+  // Null expires_at = never expires; cap the device cookie at 30d so it
+  // still rotates periodically.
+  const ttlSeconds = row.expires_at === null ? 30 * 86400 : Math.max(60, row.expires_at - now);
 
   // Check if this device already holds the lock (cookie matches committed fp).
   let holdsLock = false;
@@ -181,24 +205,23 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
     }
   }
 
+  const posterSrc = row.poster_path ? `/api/share/${token}/poster` : null;
+  const ttlLabel = row.expires_at === null ? 'no expiry' : formatTtlLong(ttlSeconds);
+
   if (holdsLock) {
+    const hasResume = hasResumablePosition(row.id);
     return (
-      <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <header className="mb-4 flex items-center justify-between animate-enter">
-            <p className="text-np-green font-mono text-xs uppercase tracking-widest">airplex</p>
-            <span className="badge">share</span>
-          </header>
-          <div className="animate-enter-delay-1">
-            <ShareWatcher
-              linkId={row.id}
-              title={row.title}
-              mediaType={row.plex_media_type}
-              rootRatingKey={row.plex_rating_key}
-            />
-          </div>
-        </div>
-      </main>
+      <ClaimedShareView
+        linkId={row.id}
+        title={row.title}
+        mediaType={row.plex_media_type}
+        rootRatingKey={row.plex_rating_key}
+        senderLabel={row.sender_label}
+        recipientLabel={row.recipient_label}
+        ttlLabel={ttlLabel}
+        posterSrc={posterSrc}
+        hasResume={hasResume}
+      />
     );
   }
 
@@ -206,9 +229,6 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   // disallows cookie mutation from Server Components; the claim must
   // happen in a Server Action triggered by the form submit.
   const boundClaim = claimAction.bind(null, token);
-  const ttlLabel = formatTtlLong(ttlSeconds);
-
-  const posterSrc = row.poster_path ? `/api/share/${token}/poster` : null;
 
   return (
     <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x relative overflow-hidden">

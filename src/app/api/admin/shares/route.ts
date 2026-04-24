@@ -31,7 +31,10 @@ const createBody = z.object({
   recipient_label: z.string().min(1).max(120),
   recipient_note: z.string().max(2000).optional(),
   sender_label: z.string().max(60).optional(),
-  ttl_hours: z.coerce.number().int().min(1).max(env.SHARE_MAX_TTL_HOURS).optional(),
+  // null = never expires; a number = TTL in hours
+  ttl_hours: z
+    .union([z.literal(null), z.coerce.number().int().min(1).max(env.SHARE_MAX_TTL_HOURS)])
+    .optional(),
   max_plays: z.union([z.literal(null), z.coerce.number().int().positive()]).optional(),
 });
 
@@ -76,7 +79,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const body = parsed.data;
 
   const now = Math.floor(Date.now() / 1000);
-  const ttlHours = body.ttl_hours ?? env.SHARE_DEFAULT_TTL_HOURS;
+  // Explicit null = never expires. Missing field falls back to default TTL.
+  const ttlHours = body.ttl_hours === null ? null : (body.ttl_hours ?? env.SHARE_DEFAULT_TTL_HOURS);
+  const expiresAt = ttlHours === null ? null : now + ttlHours * 3600;
   const id = nanoid(12);
   const { token, tokenHash } = createShareToken();
 
@@ -108,7 +113,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     sender_label: senderLabel,
     poster_path: posterPath,
     created_at: now,
-    expires_at: now + ttlHours * 3600,
+    expires_at: expiresAt,
     max_plays: body.max_plays ?? null,
     play_count: 0,
     device_fingerprint_hash: null,

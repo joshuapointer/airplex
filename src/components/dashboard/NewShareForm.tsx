@@ -123,6 +123,7 @@ export function NewShareForm() {
   const [recipientNote, setRecipientNote] = useState('');
   const [senderLabel, setSenderLabel] = useState('');
   const [ttlHours, setTtlHours] = useState('48');
+  const [ttlNever, setTtlNever] = useState(false);
   const [maxPlays, setMaxPlays] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -178,7 +179,11 @@ export function NewShareForm() {
     };
     if (recipientNote.trim()) body.recipient_note = recipientNote.trim();
     if (senderLabel.trim()) body.sender_label = senderLabel.trim();
-    if (ttlHours) body.ttl_hours = Number(ttlHours);
+    if (ttlNever) {
+      body.ttl_hours = null;
+    } else if (ttlHours) {
+      body.ttl_hours = Number(ttlHours);
+    }
     if (maxPlays.trim()) body.max_plays = Number(maxPlays);
 
     try {
@@ -350,8 +355,10 @@ export function NewShareForm() {
                 type="number"
                 min={1}
                 max={168}
-                value={ttlHours}
+                value={ttlNever ? '' : ttlHours}
+                disabled={ttlNever}
                 onChange={(e) => setTtlHours(e.target.value)}
+                placeholder={ttlNever ? 'Never expires' : undefined}
               />
             </EnvelopeField>
             <EnvelopeField label="Max plays" id="max_plays">
@@ -365,6 +372,16 @@ export function NewShareForm() {
               />
             </EnvelopeField>
           </div>
+          <label className="flex items-center gap-2 mt-2 font-mono text-xs text-np-muted cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={ttlNever}
+              onChange={(e) => setTtlNever(e.target.checked)}
+              className="accent-np-cyan"
+              style={{ width: 16, height: 16 }}
+            />
+            Never expires
+          </label>
 
           {submitError && <p className="text-np-magenta font-mono text-sm mb-3">{submitError}</p>}
 

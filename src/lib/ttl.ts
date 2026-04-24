@@ -1,7 +1,8 @@
 /** TTL formatting + pct helpers. Single source of truth. */
 
-/** Short format for dense UI surfaces: "3d", "47h", "12m". */
-export function formatTtlShort(remainingSec: number): string {
+/** Short format for dense UI surfaces: "3d", "47h", "12m", "∞". */
+export function formatTtlShort(remainingSec: number | null): string {
+  if (remainingSec === null) return '∞';
   if (remainingSec <= 0) return '0m';
   const days = Math.floor(remainingSec / 86400);
   if (days >= 2) return `${days}d`;
@@ -11,8 +12,9 @@ export function formatTtlShort(remainingSec: number): string {
   return `${mins}m`;
 }
 
-/** Long format for recipient-facing copy: "3 days", "47 hours", "12 minutes". */
-export function formatTtlLong(remainingSec: number): string {
+/** Long format for recipient-facing copy: "3 days", "no expiry". */
+export function formatTtlLong(remainingSec: number | null): string {
+  if (remainingSec === null) return 'no expiry';
   const h = Math.floor(remainingSec / 3600);
   const d = Math.floor(h / 24);
   if (d >= 2) return `${d} days`;
