@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AirplayHint } from './AirplayHint';
+import { formatHms } from './formatTime';
+import { PlayerSidePanel } from './PlayerSidePanel';
 import { VideoPlayer } from './VideoPlayer';
 import { FrameBrackets } from '@/components/ui/transmission';
 
@@ -59,6 +61,7 @@ export function ShareWatcher({ linkId, title, mediaType, rootRatingKey }: ShareW
         linkId={linkId}
         ratingKey={selectedRatingKey ?? rootRatingKey}
         title={title}
+        mediaType={mediaType}
         isShowEpisode={mediaType === 'show'}
         episodesData={episodesData}
         onBack={mediaType === 'show' ? () => setSelectedRatingKey(null) : undefined}
@@ -122,27 +125,25 @@ function EpisodePicker({
   useEffect(() => {
     if (!data) return;
     const controller = new AbortController();
-    const all = data.seasons.flatMap((s) => s.episodes.map((e) => e.ratingKey));
     (async () => {
-      const results = await Promise.all(
-        all.map(async (rk) => {
-          try {
-            const res = await fetch(
-              `/api/hls/${linkId}/resume?ratingKey=${encodeURIComponent(rk)}`,
-              { signal: controller.signal, cache: 'no-store' },
-            );
-            if (!res.ok) return [rk, 0] as const;
-            const json = (await res.json()) as ResumeResponse;
-            return [rk, json.positionMs] as const;
-          } catch {
-            return [rk, 0] as const;
-          }
-        }),
-      );
-      if (controller.signal.aborted) return;
-      const map: Record<string, number> = {};
-      for (const [rk, pos] of results) if (pos > 0) map[rk] = pos;
-      setResumeMap(map);
+      try {
+        const res = await fetch(`/api/hls/${linkId}/resume/batch`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const json = (await res.json()) as {
+          positions: Record<string, { positionMs: number }>;
+        };
+        if (controller.signal.aborted) return;
+        const map: Record<string, number> = {};
+        for (const [rk, v] of Object.entries(json.positions ?? {})) {
+          if (v.positionMs > 0) map[rk] = v.positionMs;
+        }
+        setResumeMap(map);
+      } catch {
+        /* non-fatal */
+      }
     })();
     return () => controller.abort();
   }, [data, linkId]);
@@ -267,6 +268,7 @@ function Player({
   linkId,
   ratingKey,
   title,
+  mediaType,
   isShowEpisode,
   episodesData,
   onBack,
@@ -275,6 +277,7 @@ function Player({
   linkId: string;
   ratingKey: string;
   title: string;
+  mediaType: 'movie' | 'episode' | 'show';
   isShowEpisode: boolean;
   episodesData: EpisodesResponse | null;
   onBack?: () => void;
@@ -289,6 +292,8 @@ function Player({
   const [showAirplayHint, setShowAirplayHint] = useState(false);
   const airplayHintFiredRef = useRef(false);
   const advancedRef = useRef(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [resumeMap, setResumeMap] = useState<Record<string, number>>({});
 
   const lastSavedMsRef = useRef(0);
   const lastPingMsRef = useRef(0);
@@ -459,11 +464,39 @@ function Player({
     return () => window.removeEventListener('pagehide', onPageHide);
   }, [saveProgress]);
 
+  // Populate resume map for the side-panel queue whenever the panel opens.
+  // Single batch round-trip — no per-episode waterfall.
+  useEffect(() => {
+    if (!isShowEpisode || !panelOpen) return;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(`/api/hls/${linkId}/resume/batch`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const json = (await res.json()) as {
+          positions: Record<string, { positionMs: number }>;
+        };
+        if (controller.signal.aborted) return;
+        const next: Record<string, number> = {};
+        for (const [rk, v] of Object.entries(json.positions ?? {})) {
+          if (v.positionMs > 0) next[rk] = v.positionMs;
+        }
+        setResumeMap(next);
+      } catch {
+        /* non-fatal */
+      }
+    })();
+    return () => controller.abort();
+  }, [isShowEpisode, linkId, panelOpen]);
+
   return (
-    <div className="player-shell">
+    <div className="player-shell" data-panel-open={panelOpen ? 'true' : 'false'}>
       <FrameBrackets animated={false} />
       <div
-        className="flex flex-col gap-3 animate-enter"
+        className="flex flex-col gap-3 animate-enter player-stage"
         style={{ position: 'relative', zIndex: 2 }}
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -526,6 +559,8 @@ function Player({
           onEnded={handleEnded}
           onNearEnd={handleNearEnd}
           nearEndThresholdSec={UP_NEXT_COUNTDOWN_SEC + 2}
+          onOpenPanel={() => setPanelOpen((v) => !v)}
+          panelOpen={panelOpen}
         >
           {showUpNext && nextEpisode ? (
             <div className="vp-upnext" role="region" aria-label="Up next">
@@ -561,15 +596,31 @@ function Player({
 
         <AirplayHint visible={showAirplayHint} />
       </div>
+
+      <PlayerSidePanel
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        linkId={linkId}
+        ratingKey={ratingKey}
+        kind={mediaType}
+        queue={
+          episodesData
+            ? {
+                show: {
+                  ratingKey: episodesData.show.ratingKey,
+                  title: episodesData.show.title,
+                  summary: episodesData.show.summary,
+                },
+                seasons: episodesData.seasons,
+              }
+            : null
+        }
+        resumeMap={resumeMap}
+        onSelectEpisode={(rk) => {
+          if (onAdvance) onAdvance(rk);
+          setPanelOpen(false);
+        }}
+      />
     </div>
   );
-}
-
-function formatHms(ms: number): string {
-  const total = Math.floor(ms / 1000);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  return `${m}:${String(s).padStart(2, '0')}`;
 }

@@ -34,6 +34,13 @@ export interface VideoPlayerProps {
   onNearEnd?: () => void;
   nearEndThresholdSec?: number;
   children?: ReactNode;
+  /**
+   * Called when the user clicks the "info" button in the control bar.
+   * If omitted, the button is hidden.
+   */
+  onOpenPanel?: () => void;
+  /** Whether the side panel is currently open — used for aria-pressed state. */
+  panelOpen?: boolean;
 }
 
 function isIosSafari(): boolean {
@@ -66,6 +73,8 @@ export function VideoPlayer({
   onNearEnd,
   nearEndThresholdSec = 15,
   children,
+  onOpenPanel,
+  panelOpen = false,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -1161,6 +1170,19 @@ export function VideoPlayer({
             </button>
           ) : null}
 
+          {/* Info / side panel toggle */}
+          {onOpenPanel ? (
+            <button
+              type="button"
+              className="vp-btn"
+              onClick={onOpenPanel}
+              aria-label={panelOpen ? 'Close details panel' : 'Open details panel'}
+              aria-pressed={panelOpen}
+            >
+              <InfoIcon />
+            </button>
+          ) : null}
+
           {/* Fullscreen */}
           <button
             type="button"
@@ -1285,6 +1307,15 @@ function FsExitIcon() {
         strokeWidth="1.4"
         strokeLinecap="round"
       />
+    </svg>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="6.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M9 8v4M9 6v.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

@@ -10,6 +10,21 @@ export function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+/** Format a millisecond count as H:MM:SS or M:SS. */
+export function formatHms(ms: number): string {
+  return formatTime(Math.floor(ms / 1000));
+}
+
+/** Format a millisecond count as "Xh Ym" (or "Ym" if under 1h). Null/≤0 → null. */
+export function formatRuntime(ms: number | null | undefined): string | null {
+  if (ms === null || ms === undefined || !Number.isFinite(ms) || ms <= 0) return null;
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export function formatTimeLong(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '0 seconds';
   const total = Math.floor(seconds);

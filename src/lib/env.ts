@@ -68,6 +68,10 @@ const schema = z
     PLEX_TOKEN: z.string().optional().default(''),
     PLEX_CLIENT_IDENTIFIER: z.string().min(1, 'PLEX_CLIENT_IDENTIFIER is required'),
 
+    // Optional fallback metadata provider. Used when Plex omits fields
+    // (e.g. no poster, no cast, no ratings). Read-only, single v3 API key.
+    TMDB_API_KEY: z.string().optional().default(''),
+
     SESSION_SECRET: secret32('SESSION_SECRET'),
     DEVICE_LOCK_SECRET: secret32('DEVICE_LOCK_SECRET'),
     SHARE_TOKEN_SECRET: secret32('SHARE_TOKEN_SECRET'),

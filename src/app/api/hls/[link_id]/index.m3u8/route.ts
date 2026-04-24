@@ -4,6 +4,8 @@ import { buildStartUrl } from '@/plex/transcode';
 import { plexFetch, PlexError } from '@/plex/client';
 import { getPlexBaseUrl } from '@/plex/config';
 import { rewriteManifest } from '@/plex/hls-rewriter';
+import { getMetadata } from '@/plex/metadata';
+import { isDescendantOfShow } from '@/lib/scope-guard';
 import { logEvent } from '@/db/queries/events';
 import { logger } from '@/lib/logger';
 import type { ShareRow } from '@/types/share';
@@ -37,16 +39,27 @@ export async function GET(
   // Per-episode override for shows. Share at show level carries
   // row.plex_rating_key = the series; the player passes ?rk=<episode> when
   // the recipient picks an episode. Strict numeric guard to prevent
-  // injection into the Plex `path` param.
+  // injection into the Plex `path` param, plus a descendant check against
+  // the share's show — a valid share cookie must not let the recipient
+  // transcode arbitrary library items outside their share's scope.
   const url = new URL(request.url);
   const rkParam = url.searchParams.get('rk');
   let ratingKey = row.plex_rating_key;
-  if (rkParam) {
+  if (rkParam && rkParam !== row.plex_rating_key) {
     if (!/^\d+$/.test(rkParam)) {
       return NextResponse.json({ error: 'invalid_rk' }, { status: 400 });
     }
     if (row.plex_media_type !== 'show') {
       return NextResponse.json({ error: 'rk_override_requires_show' }, { status: 400 });
+    }
+    try {
+      const probe = await getMetadata(rkParam);
+      if (!isDescendantOfShow(probe, row.plex_rating_key)) {
+        return NextResponse.json({ error: 'out_of_scope' }, { status: 403 });
+      }
+    } catch (err) {
+      const status = err instanceof PlexError ? err.status : 502;
+      return NextResponse.json({ error: 'plex_error', status }, { status: 502 });
     }
     ratingKey = rkParam;
   }
