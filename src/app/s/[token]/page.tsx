@@ -10,6 +10,7 @@ import {
   PlayButton,
   PosterCard,
   TypewriterTitle,
+  armCurtainOnSubmit,
 } from '@/components/ui/transmission';
 import { logEvent } from '@/db/queries/events';
 import {
@@ -254,7 +255,11 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
               />
 
               {/* CTA */}
-              <form action={boundClaim} className="w-full animate-enter-delay-3">
+              <form
+                action={boundClaim}
+                onSubmit={armCurtainOnSubmit}
+                className="w-full animate-enter-delay-3"
+              >
                 <PlayButton formAction={boundClaim} aria-label={`Start streaming ${row.title}`}>
                   <svg
                     aria-hidden="true"

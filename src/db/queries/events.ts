@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import type Database from 'better-sqlite3';
 import { getDb } from '../client';
 import type { ShareEventKind } from '@/types/share';
+import type { EventTailRow } from '@/types/transmission';
 
 // ---------- daily IP salt (in-memory, rotates per UTC day) ----------
 
@@ -89,4 +90,82 @@ export function getRecentPlayShareIds(withinSeconds: number = LIVE_WINDOW_S): Se
   const threshold = Math.floor(Date.now() / 1000) - withinSeconds;
   const rows = recentPlayStmt().all(threshold) as { share_id: string }[];
   return new Set(rows.map((r) => r.share_id));
+}
+
+// ---------- event tail ----------
+
+let _recentEventsStmt: Database.Statement<[number]> | null = null;
+
+function recentEventsStmt() {
+  if (_recentEventsStmt) return _recentEventsStmt;
+  _recentEventsStmt = getDb().prepare<[number]>(
+    'SELECT\n' +
+      '  e.id, e.at, e.kind, e.share_id, e.detail,\n' +
+      '  s.recipient_label AS recipient_label\n' +
+      'FROM share_events e\n' +
+      'LEFT JOIN shares s ON s.id = e.share_id\n' +
+      'ORDER BY e.at DESC\n' +
+      'LIMIT ?',
+  );
+  return _recentEventsStmt;
+}
+
+interface RawEventRow {
+  id: number;
+  at: number;
+  kind: ShareEventKind;
+  share_id: string;
+  detail: string | null;
+  recipient_label: string | null;
+}
+
+function buildShortDetail(kind: ShareEventKind, detail: string | null): string | null {
+  let parsed: Record<string, unknown> | null = null;
+  if (detail) {
+    try {
+      parsed = JSON.parse(detail) as Record<string, unknown>;
+    } catch {
+      // non-JSON detail — ignore
+    }
+  }
+  switch (kind) {
+    case 'claimed': {
+      const fp = typeof parsed?.device_fp === 'string' ? parsed.device_fp : null;
+      return fp ? fp.slice(-16) : 'device';
+    }
+    case 'rejected_device':
+      return 'rejected';
+    case 'created': {
+      const ttl = typeof parsed?.ttl_hours === 'number' ? parsed.ttl_hours : null;
+      return ttl !== null ? `${ttl}h ttl` : 'created';
+    }
+    case 'revoked':
+      return 'revoked';
+    case 'play':
+      return 'play';
+    case 'reset': {
+      const action = typeof parsed?.action === 'string' ? parsed.action : null;
+      if (action === 'extended') {
+        const hours = typeof parsed?.hours === 'number' ? parsed.hours : null;
+        return hours !== null ? `+${hours}h` : 'reset';
+      }
+      return 'reset';
+    }
+    case 'expired':
+      return 'expired';
+    default:
+      return null;
+  }
+}
+
+export function listRecentEventsWithShare(limit: number = 5): EventTailRow[] {
+  const rows = recentEventsStmt().all(limit) as RawEventRow[];
+  return rows.map((r) => ({
+    id: r.id,
+    at: r.at,
+    kind: r.kind,
+    share_id: r.share_id,
+    recipient_label: r.recipient_label,
+    short_detail: buildShortDetail(r.kind, r.detail),
+  }));
 }

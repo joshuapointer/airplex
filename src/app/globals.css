@@ -32,6 +32,20 @@
   --np-ttl-fill-warn: var(--np-magenta);
   --np-live-dot: var(--np-green);
   --np-typewriter-char-ms: 18ms;
+
+  /* ── Mission C (Autopilot §G) — tokens ── */
+  --np-cmdk-backdrop: rgba(0, 0, 0, 0.65);
+  --np-cmdk-panel-bg: rgba(8, 8, 8, 0.94);
+  --np-cmdk-panel-border: rgba(255, 255, 255, 0.1);
+  --np-cmdk-item-selected-bg: rgba(0, 240, 255, 0.08);
+  --np-focus-row: rgba(0, 240, 255, 0.06);
+  --np-tail-row-height: 20px;
+  --np-tail-bg: rgba(0, 0, 0, 0.82);
+  --np-curtain-duration: 320ms;
+  --np-wizard-duration: 320ms;
+  --np-wizard-translate: 24px;
+  --np-flicker-duration: 6s;
+  --np-flicker-opacity: 0.6;
 }
 
 html,
@@ -1020,6 +1034,223 @@ body {
     box-shadow: 0 0 6px var(--np-live-dot);
     animation: np-bloom-box 2.4s ease-in-out infinite;
   }
+
+  /* ── Event tail (persistent recent-activity strip) ── */
+  .event-tail {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--np-tail-bg);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    padding: 0.25rem 0.75rem calc(0.25rem + env(safe-area-inset-bottom)) 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-family: var(--np-font-body);
+    font-size: 0.68rem;
+    line-height: var(--np-tail-row-height);
+    color: var(--np-muted);
+    z-index: 40;
+    pointer-events: none;
+    max-height: calc(var(--np-tail-row-height) * 5 + 0.5rem);
+    overflow: hidden;
+  }
+  .event-tail-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: np-fade-in-up 180ms var(--np-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  .event-tail-row[data-new='true'] {
+    animation:
+      np-fade-in-up 180ms var(--np-ease-out) both,
+      np-bloom-box 1200ms ease-in-out 1;
+    color: var(--np-fg);
+  }
+  .event-tail-ts {
+    color: var(--np-muted);
+    min-width: 4.5rem;
+  }
+  .event-tail-kind {
+    color: var(--np-cyan);
+    min-width: 5.5rem;
+  }
+  .event-tail-body {
+    color: var(--np-fg);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Count-up (tabular numerics for smooth value ticking) ── */
+  .count-up-value {
+    font-variant-numeric: tabular-nums;
+    color: var(--np-fg);
+  }
+
+  /* ── Brand flicker ── */
+  .brand-flicker {
+    animation: np-flicker var(--np-flicker-duration, 6s) ease-in-out infinite;
+  }
+
+  /* ── Command palette (⌘K) ── */
+  .cmdk-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--np-cmdk-backdrop);
+    z-index: 60;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 18vh;
+    animation: np-fade-only 120ms ease both;
+  }
+  .cmdk-panel {
+    width: min(560px, 92vw);
+    background: var(--np-cmdk-panel-bg);
+    border: 1px solid var(--np-cmdk-panel-border);
+    border-radius: var(--np-radius-sharp);
+    backdrop-filter: blur(20px) saturate(1.3);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+    display: flex;
+    flex-direction: column;
+    max-height: 60vh;
+    overflow: hidden;
+    animation: np-pop-in 140ms var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) both;
+  }
+  .cmdk-input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--np-cmdk-panel-border);
+    color: var(--np-fg);
+    font-family: var(--np-font-body);
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .cmdk-list {
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .cmdk-group-label {
+    padding: 0.45rem 0.75rem 0.25rem;
+    font-family: var(--np-font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--np-muted);
+  }
+  .cmdk-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.75rem;
+    font-family: var(--np-font-body);
+    font-size: 0.85rem;
+    color: var(--np-fg);
+    border-radius: var(--np-radius-sharp);
+    cursor: pointer;
+    user-select: none;
+  }
+  .cmdk-item[aria-selected='true'] {
+    background: var(--np-cmdk-item-selected-bg);
+    color: var(--np-cyan);
+  }
+  .cmdk-item[data-disabled='true'] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .cmdk-hint {
+    font-family: var(--np-font-body);
+    font-size: 0.7rem;
+    color: var(--np-muted);
+    border: 1px solid var(--np-border, rgba(255, 255, 255, 0.15));
+    padding: 0.05rem 0.35rem;
+    border-radius: var(--np-radius-sharp);
+  }
+
+  /* ── Row cursor (j/k nav focus) ── */
+  tr.row-cursor > td,
+  tr[data-cursor='true'] > td {
+    background: var(--np-focus-row);
+  }
+  tr.row-cursor {
+    outline: 1px solid rgba(0, 240, 255, 0.25);
+    outline-offset: -1px;
+  }
+
+  /* ── Row drawer (in-place expansion) ── */
+  tr.row-drawer-tr > td {
+    padding: 0 !important;
+    border-bottom: 0;
+  }
+  .row-drawer {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 260ms var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1));
+  }
+  .row-drawer[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+  .row-drawer-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .row-drawer-inner > div {
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px dashed var(--np-border, rgba(255, 255, 255, 0.08));
+  }
+
+  /* ── Wizard slide (NewShareForm step transitions) ── */
+  .wizard-stage {
+    position: relative;
+    min-height: 200px;
+  }
+  .wizard-stage > [data-wizard-layer] {
+    width: 100%;
+  }
+  .wizard-stage > [data-wizard-layer='exit'] {
+    position: absolute;
+    inset: 0;
+    animation: np-wizard-exit var(--np-wizard-duration)
+      var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) forwards;
+    pointer-events: none;
+  }
+  .wizard-stage > [data-wizard-layer='enter'] {
+    animation: np-wizard-enter var(--np-wizard-duration)
+      var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) forwards;
+  }
+
+  /* ── Player shell (persistent brackets around <VideoPlayer>) ── */
+  .player-shell {
+    position: relative;
+  }
+  .player-shell > .frame-brackets {
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* ── Curtain transition (pre-claim → player) — outside @layer components since it targets <html> ── */
+html[data-curtain='up']::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--np-bg);
+  z-index: 9999;
+  pointer-events: none;
+  animation: np-curtain-rise var(--np-curtain-duration, 320ms)
+    var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) forwards;
 }
 
 @keyframes np-pop-in {
@@ -1067,6 +1298,62 @@ body {
   }
   to {
     transform: translate3d(0, 100%, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes np-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes np-flicker {
+  0%,
+  97%,
+  99%,
+  100% {
+    opacity: 1;
+  }
+  98% {
+    opacity: var(--np-flicker-opacity, 0.6);
+  }
+}
+
+@keyframes np-wizard-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--np-wizard-translate), 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes np-wizard-exit {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(calc(var(--np-wizard-translate) * -1), 0, 0);
+  }
+}
+
+@keyframes np-curtain-rise {
+  from {
+    transform: translateY(0);
+    opacity: 0.98;
+  }
+  to {
+    transform: translateY(-100%);
     opacity: 0;
   }
 }
@@ -1134,6 +1421,28 @@ body {
   .live-dot {
     animation: none;
     opacity: 1;
+  }
+
+  /* Mission C (autopilot) wave β.2 reduced-motion overrides */
+  .event-tail-row,
+  .event-tail-row[data-new='true'] {
+    animation: np-fade-only 200ms ease both;
+  }
+  .brand-flicker {
+    animation: none;
+  }
+  .cmdk-panel,
+  .cmdk-backdrop {
+    animation: np-fade-only 160ms ease both;
+  }
+  .row-drawer {
+    transition: none;
+  }
+  .wizard-stage > [data-wizard-layer] {
+    animation: np-fade-only 200ms ease both !important;
+  }
+  html[data-curtain='up']::after {
+    animation: np-fade-only 160ms ease forwards;
   }
 }
 

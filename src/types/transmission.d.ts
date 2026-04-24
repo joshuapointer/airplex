@@ -7,3 +7,21 @@ export interface LiveMap {
 }
 
 // LIVE_WINDOW_S lives in src/db/queries/events.ts
+
+// ── Mission C (Autopilot) — event tail types ──
+
+import type { ShareEventKind } from '@/types/share';
+
+export interface EventTailRow {
+  id: number;
+  at: number;
+  kind: ShareEventKind;
+  share_id: string;
+  recipient_label: string | null;
+  short_detail: string | null;
+}
+
+export interface EventTailResponse {
+  events: EventTailRow[];
+  serverTs: number;
+}

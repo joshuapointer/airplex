@@ -4,6 +4,9 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/auth/guards';
 import { CsrfProvider } from '@/components/dashboard/CsrfContext';
+import { CommandPaletteMount } from '@/components/dashboard/CommandPaletteMount';
+import { BrandFlicker } from '@/components/dashboard/BrandFlicker';
+import { EventTail } from '@/components/dashboard/EventTail';
 import { isPlexConfigured } from '@/plex/config';
 import { pickAmbientShare } from '@/db/queries/shares';
 import { AmbientBackdrop } from '@/components/ui/transmission';
@@ -27,6 +30,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <CsrfProvider csrf={session.csrf}>
+      <CommandPaletteMount csrf={session.csrf} />
       <div
         className="relative min-h-screen"
         style={{ background: 'var(--np-bg)', color: 'var(--np-fg)' }}
@@ -36,7 +40,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           {/* Sidebar */}
           <aside className="glass w-[220px] flex flex-col gap-2 p-6 border-r border-[rgba(255,255,255,0.08)] rounded-none">
             <div className="font-display uppercase text-xl tracking-[0.08em] text-np-cyan mb-6">
-              airplex
+              <BrandFlicker>airplex</BrandFlicker>
             </div>
 
             <NavLink href="/dashboard" pathname={pathname}>
@@ -59,9 +63,15 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 p-8 overflow-y-auto">{children}</main>
+          <main
+            className="flex-1 p-8 overflow-y-auto"
+            style={{ paddingBottom: 'calc(var(--np-tail-row-height) * 5 + 1rem)' }}
+          >
+            {children}
+          </main>
         </div>
       </div>
+      <EventTail />
     </CsrfProvider>
   );
 }

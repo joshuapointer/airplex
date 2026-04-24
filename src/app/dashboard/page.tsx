@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { listShares, computeShareStatus } from '@/db/queries/shares';
 import { getRecentPlayShareIds } from '@/db/queries/events';
 import { NowLiveStrip } from '@/components/ui/transmission';
+import { FooterStats } from '@/components/dashboard/FooterStats';
 import type { LiveMap } from '@/types/transmission';
 
 export default async function DashboardPage() {
@@ -46,12 +46,7 @@ export default async function DashboardPage() {
         <NowLiveStrip shares={activeShares} liveMap={liveMap} />
       </section>
 
-      <p className="text-xs text-np-muted font-mono mt-6 animate-enter-delay-2">
-        {active} active · {expired} expired · {revoked} revoked ·{' '}
-        <Link href="/dashboard/shares" className="text-np-cyan no-underline hover:underline">
-          view all →
-        </Link>
-      </p>
+      <FooterStats active={active} expired={expired} revoked={revoked} />
     </div>
   );
 }

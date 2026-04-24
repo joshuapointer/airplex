@@ -27,3 +27,5 @@ export { PlayButton } from './PlayButton';
 export type { PlayButtonProps } from './PlayButton';
 
 export { playCueAudio } from './playCueAudio';
+
+export { armCurtainOnSubmit } from './CurtainTransition';

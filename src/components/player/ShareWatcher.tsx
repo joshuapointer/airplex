@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AirplayHint } from './AirplayHint';
 import { VideoPlayer } from './VideoPlayer';
+import { FrameBrackets } from '@/components/ui/transmission';
 
 interface Episode {
   ratingKey: string;
@@ -459,101 +460,107 @@ function Player({
   }, [saveProgress]);
 
   return (
-    <div className="flex flex-col gap-3 animate-enter">
-      <div className="flex items-center gap-3 min-w-0">
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className="btn-ghost shrink-0"
-            aria-label="Back to episode list"
-            style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
-          >
-            ← Episodes
-          </button>
-        ) : null}
-        <h1 className="font-display text-xl sm:text-2xl uppercase tracking-widest text-np-cyan truncate min-w-0">
-          {title}
-        </h1>
-      </div>
-
-      {/* Resume offer */}
-      {resumeOffer !== null ? (
-        <div
-          className="resume-banner flex items-center justify-between gap-3 p-3 rounded-sharp"
-          style={{ background: 'var(--np-green-subtle)', border: '1px solid var(--np-green)' }}
-          role="region"
-          aria-label="Resume playback"
-        >
-          <span className="font-mono text-sm text-np-fg">
-            Resume from {formatHms(resumeOffer)}?
-          </span>
-          <span className="flex gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={acceptResume}
-              className="btn-primary"
-              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
-            >
-              Resume
-            </button>
-            <button
-              type="button"
-              onClick={startOver}
-              className="btn-ghost"
-              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
-            >
-              Start over
-            </button>
-          </span>
-        </div>
-      ) : null}
-
-      <VideoPlayer
-        src={hlsUrl}
-        title={title}
-        startPositionSec={resumeResolved ? startSec : null}
-        autoPlay={false}
-        onTimeUpdate={handleTimeUpdate}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onEnded={handleEnded}
-        onNearEnd={handleNearEnd}
-        nearEndThresholdSec={UP_NEXT_COUNTDOWN_SEC + 2}
+    <div className="player-shell">
+      <FrameBrackets animated={false} />
+      <div
+        className="flex flex-col gap-3 animate-enter"
+        style={{ position: 'relative', zIndex: 2 }}
       >
-        {showUpNext && nextEpisode ? (
-          <div className="vp-upnext" role="region" aria-label="Up next">
-            <div className="vp-upnext-label">Up next · in {upNextSeconds}s</div>
-            <div className="vp-upnext-title">
-              {nextEpisode.index !== null ? `${nextEpisode.index}. ` : ''}
-              {nextEpisode.title}
-            </div>
-            <div className="vp-upnext-actions">
+        <div className="flex items-center gap-3 min-w-0">
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="btn-ghost shrink-0"
+              aria-label="Back to episode list"
+              style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
+            >
+              ← Episodes
+            </button>
+          ) : null}
+          <h1 className="font-display text-xl sm:text-2xl uppercase tracking-widest text-np-cyan truncate min-w-0">
+            {title}
+          </h1>
+        </div>
+
+        {/* Resume offer */}
+        {resumeOffer !== null ? (
+          <div
+            className="resume-banner flex items-center justify-between gap-3 p-3 rounded-sharp"
+            style={{ background: 'var(--np-green-subtle)', border: '1px solid var(--np-green)' }}
+            role="region"
+            aria-label="Resume playback"
+          >
+            <span className="font-mono text-sm text-np-fg">
+              Resume from {formatHms(resumeOffer)}?
+            </span>
+            <span className="flex gap-2 shrink-0">
               <button
                 type="button"
+                onClick={acceptResume}
                 className="btn-primary"
-                onClick={() => {
-                  setShowUpNext(false);
-                  advanceOnce(nextEpisode.ratingKey);
-                }}
                 style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
               >
-                Play now
+                Resume
               </button>
               <button
                 type="button"
+                onClick={startOver}
                 className="btn-ghost"
-                onClick={() => setShowUpNext(false)}
                 style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
               >
-                Cancel
+                Start over
               </button>
-            </div>
+            </span>
           </div>
         ) : null}
-      </VideoPlayer>
 
-      <AirplayHint visible={showAirplayHint} />
+        <VideoPlayer
+          src={hlsUrl}
+          title={title}
+          startPositionSec={resumeResolved ? startSec : null}
+          autoPlay={false}
+          onTimeUpdate={handleTimeUpdate}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onEnded={handleEnded}
+          onNearEnd={handleNearEnd}
+          nearEndThresholdSec={UP_NEXT_COUNTDOWN_SEC + 2}
+        >
+          {showUpNext && nextEpisode ? (
+            <div className="vp-upnext" role="region" aria-label="Up next">
+              <div className="vp-upnext-label">Up next · in {upNextSeconds}s</div>
+              <div className="vp-upnext-title">
+                {nextEpisode.index !== null ? `${nextEpisode.index}. ` : ''}
+                {nextEpisode.title}
+              </div>
+              <div className="vp-upnext-actions">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    setShowUpNext(false);
+                    advanceOnce(nextEpisode.ratingKey);
+                  }}
+                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
+                >
+                  Play now
+                </button>
+                <button
+                  type="button"
+                  className="btn-ghost"
+                  onClick={() => setShowUpNext(false)}
+                  style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </VideoPlayer>
+
+        <AirplayHint visible={showAirplayHint} />
+      </div>
     </div>
   );
 }

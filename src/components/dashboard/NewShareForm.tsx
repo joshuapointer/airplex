@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PlexMetadata } from '@/types/plex';
+import type { PlexSearchResult } from '@/plex/search';
 import { LibraryPicker } from './LibraryPicker';
 import { useCsrf } from './CsrfContext';
+import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { PosterCard } from '@/components/ui/transmission';
 
@@ -57,6 +59,22 @@ function EnvelopeField({
   );
 }
 
+/**
+ * Adapt a PlexSearchResult (typeahead response) into a PlexMetadata shape
+ * the rest of the wizard consumes. Missing `ratingKey`/`title` would already
+ * have been filtered by the server; defensive mapping here.
+ */
+function adaptSearchResultsToMetadata(results: PlexSearchResult[]): PlexMetadata[] {
+  return results.map((r) => ({
+    ratingKey: r.ratingKey,
+    type: r.type,
+    title: r.title,
+    grandparentTitle: r.grandparentTitle,
+    parentTitle: r.parentTitle,
+    thumb: r.thumb,
+  }));
+}
+
 export function NewShareForm() {
   const csrf = useCsrf();
   const router = useRouter();
@@ -70,6 +88,36 @@ export function NewShareForm() {
   const [selectedItem, setSelectedItem] = useState<PlexMetadata | null>(null);
   const [itemQuery, setItemQuery] = useState('');
 
+  // Server-side typeahead (M9)
+  const debouncedQuery = useDebouncedValue(itemQuery, 250);
+  const [typeaheadItems, setTypeaheadItems] = useState<PlexMetadata[] | null>(null);
+  const [typeaheadLoading, setTypeaheadLoading] = useState(false);
+
+  useEffect(() => {
+    if (debouncedQuery.length < 2) {
+      setTypeaheadItems(null);
+      setTypeaheadLoading(false);
+      return;
+    }
+    const ac = new AbortController();
+    setTypeaheadLoading(true);
+    const url =
+      `/api/admin/libraries/search?q=${encodeURIComponent(debouncedQuery)}` +
+      (sectionId ? `&sectionId=${encodeURIComponent(sectionId)}` : '');
+    fetch(url, { signal: ac.signal, headers: { 'x-airplex-csrf': csrf } })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data: { items: PlexSearchResult[] }) => {
+        setTypeaheadItems(adaptSearchResultsToMetadata(data.items ?? []));
+      })
+      .catch(() => {
+        /* aborted or error — revert to initial items */
+      })
+      .finally(() => {
+        setTypeaheadLoading(false);
+      });
+    return () => ac.abort();
+  }, [debouncedQuery, sectionId, csrf]);
+
   // Details form state
   const [recipientLabel, setRecipientLabel] = useState('');
   const [recipientNote, setRecipientNote] = useState('');
@@ -82,6 +130,17 @@ export function NewShareForm() {
   // Done state
   const [result, setResult] = useState<CreateResult | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Wizard slide — track previous step to run exit animation
+  const stepRef = useRef<Step>(step);
+  const [previous, setPrevious] = useState<Step | null>(null);
+  useEffect(() => {
+    if (stepRef.current !== step) {
+      setPrevious(stepRef.current);
+      stepRef.current = step;
+    }
+  }, [step]);
+  const handleExitEnd = () => setPrevious(null);
 
   async function loadItems(sid: string) {
     if (!sid) return;
@@ -154,233 +213,245 @@ export function NewShareForm() {
 
   const heading = 'font-display uppercase tracking-wide text-lg text-np-cyan mb-4';
 
-  // ---- Step: library ----
-  if (step === 'library') {
+  function renderLibrary() {
     return (
       <div>
-        <StepIndicator current={step} />
-        <div key="library" className="animate-enter">
-          <h2 className={heading}>Step 1 — Pick a Library</h2>
-          <div className="max-w-[400px] flex flex-col gap-3">
-            <LibraryPicker value={sectionId} onChange={setSectionId} disabled={itemsLoading} />
-            {itemsError && <p className="text-np-magenta font-mono text-sm">{itemsError}</p>}
-            <div>
-              <button
-                onClick={() => loadItems(sectionId)}
-                disabled={!sectionId || itemsLoading}
-                className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {itemsLoading ? 'Loading…' : 'Next →'}
-              </button>
-            </div>
+        <h2 className={heading}>Step 1 — Pick a Library</h2>
+        <div className="max-w-[400px] flex flex-col gap-3">
+          <LibraryPicker value={sectionId} onChange={setSectionId} disabled={itemsLoading} />
+          {itemsError && <p className="text-np-magenta font-mono text-sm">{itemsError}</p>}
+          <div>
+            <button
+              onClick={() => loadItems(sectionId)}
+              disabled={!sectionId || itemsLoading}
+              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {itemsLoading ? 'Loading…' : 'Next →'}
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  // ---- Step: pick item ----
-  if (step === 'item') {
-    const filteredItems = items.filter((i) => {
-      const q = itemQuery.toLowerCase();
-      return (i.title + ' ' + (i.grandparentTitle ?? '') + ' ' + (i.parentTitle ?? ''))
-        .toLowerCase()
-        .includes(q);
-    });
+  function renderItem() {
+    // Server-side typeahead when user has typed ≥ 2 chars; else show initial items.
+    const displayItems: PlexMetadata[] = typeaheadItems ?? items;
     return (
       <div>
-        <StepIndicator current={step} />
-        <div key="item" className="animate-enter">
-          <h2 className={heading}>Step 2 — Pick an Item</h2>
+        <h2 className={heading}>Step 2 — Pick an Item</h2>
+        <button
+          onClick={() => {
+            setItemQuery('');
+            setTypeaheadItems(null);
+            setStep('library');
+          }}
+          className="btn-ghost text-xs mb-4"
+        >
+          ← Back
+        </button>
+        <input
+          type="text"
+          value={itemQuery}
+          onChange={(e) => setItemQuery(e.target.value)}
+          placeholder="⌕ Search…"
+          className="w-full bg-transparent border border-[rgba(255,255,255,0.12)] rounded-sharp px-3 py-2 text-sm font-mono text-np-fg outline-none focus:border-np-cyan mb-4"
+          aria-label="Search items"
+        />
+        {typeaheadLoading && <p className="text-np-muted font-mono text-xs mb-2">Searching…</p>}
+        {displayItems.length === 0 ? (
+          <p className="p-4 text-np-muted font-mono text-sm">
+            {typeaheadItems !== null ? 'No matches.' : 'No items found in this library.'}
+          </p>
+        ) : (
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x">
+            {displayItems.map((item) => (
+              <button
+                key={item.ratingKey}
+                onClick={() => {
+                  setSelectedItem(item);
+                  setStep('details');
+                }}
+                className="library-tile snap-start shrink-0 bg-transparent border border-[rgba(255,255,255,0.1)] rounded-sharp p-2 hover:border-np-cyan transition-colors text-left"
+                style={{ width: '180px' }}
+              >
+                <PosterCard
+                  posterUrl={
+                    item.thumb
+                      ? `/api/admin/plex/thumb?path=${encodeURIComponent(item.thumb)}`
+                      : null
+                  }
+                  title={item.title}
+                  aspect="3/4"
+                  width={160}
+                  height={240}
+                  loading="lazy"
+                />
+                <div className="mt-2 flex flex-col gap-0.5">
+                  <span className="font-mono text-xs text-np-muted uppercase">{item.type}</span>
+                  <span className="font-mono text-sm text-np-fg line-clamp-2">
+                    {item.grandparentTitle
+                      ? `${item.grandparentTitle} — ${item.title}`
+                      : item.title}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function renderDetails() {
+    return (
+      <div>
+        <h2 className={heading}>Step 3 — Share Details</h2>
+        <button onClick={() => setStep('item')} className="btn-ghost text-xs">
+          ← Back
+        </button>
+
+        <p className="text-np-muted font-mono text-sm mt-4">
+          Sharing: <strong className="text-np-fg">{selectedItem?.title}</strong>
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-5 max-w-[480px]">
+          <EnvelopeField label="To" id="recipient_label">
+            <input
+              id="recipient_label"
+              required
+              value={recipientLabel}
+              onChange={(e) => setRecipientLabel(e.target.value)}
+              placeholder="Alice"
+            />
+          </EnvelopeField>
+          <EnvelopeField label="From" id="sender_label">
+            <input
+              id="sender_label"
+              maxLength={60}
+              value={senderLabel}
+              onChange={(e) => setSenderLabel(e.target.value)}
+              placeholder="Josh"
+            />
+          </EnvelopeField>
+          <EnvelopeField label="Note" id="recipient_note">
+            <textarea
+              id="recipient_note"
+              value={recipientNote}
+              onChange={(e) => setRecipientNote(e.target.value)}
+              placeholder="Optional private note"
+              rows={2}
+            />
+          </EnvelopeField>
+          <div className="grid grid-cols-2 gap-4">
+            <EnvelopeField label="TTL (hours)" id="ttl_hours">
+              <input
+                id="ttl_hours"
+                type="number"
+                min={1}
+                max={168}
+                value={ttlHours}
+                onChange={(e) => setTtlHours(e.target.value)}
+              />
+            </EnvelopeField>
+            <EnvelopeField label="Max plays" id="max_plays">
+              <input
+                id="max_plays"
+                type="number"
+                min={1}
+                value={maxPlays}
+                onChange={(e) => setMaxPlays(e.target.value)}
+                placeholder="Unlimited"
+              />
+            </EnvelopeField>
+          </div>
+
+          {submitError && <p className="text-np-magenta font-mono text-sm mb-3">{submitError}</p>}
+
+          <div>
+            <button
+              type="submit"
+              disabled={submitting || !recipientLabel.trim()}
+              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Creating…' : 'Create Share'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  function renderDone() {
+    if (!result) return null;
+    return (
+      <div>
+        <h2 className="font-display uppercase tracking-wide text-lg text-np-green mb-4">
+          Share Created
+        </h2>
+        <p className="text-np-muted font-mono text-sm mb-4">
+          The share link is shown only once. Copy it now.
+        </p>
+
+        <GlassPanel className="p-4 mb-4">
+          <div className="font-mono break-all text-np-cyan text-sm">{result.shareUrl}</div>
+        </GlassPanel>
+
+        <div className="flex flex-wrap gap-3">
+          <button onClick={copyLink} className="btn-primary text-sm">
+            {copied ? 'Copied!' : 'Copy Link'}
+          </button>
+          <button
+            onClick={() => router.push(`/dashboard/shares/${result.id}`)}
+            className="btn-ghost text-sm"
+          >
+            View Share →
+          </button>
           <button
             onClick={() => {
-              setItemQuery('');
               setStep('library');
+              setSectionId('');
+              setItems([]);
+              setSelectedItem(null);
+              setItemQuery('');
+              setTypeaheadItems(null);
+              setRecipientLabel('');
+              setRecipientNote('');
+              setSenderLabel('');
+              setTtlHours('48');
+              setMaxPlays('');
+              setResult(null);
             }}
-            className="btn-ghost text-xs mb-4"
+            className="btn-ghost text-sm"
           >
-            ← Back
+            Create Another
           </button>
-          <input
-            type="text"
-            value={itemQuery}
-            onChange={(e) => setItemQuery(e.target.value)}
-            placeholder="⌕ Search…"
-            className="w-full bg-transparent border border-[rgba(255,255,255,0.12)] rounded-sharp px-3 py-2 text-sm font-mono text-np-fg outline-none focus:border-np-cyan mb-4"
-            aria-label="Search items"
-          />
-          {items.length === 0 ? (
-            <p className="p-4 text-np-muted font-mono text-sm">No items found in this library.</p>
-          ) : (
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x">
-              {filteredItems.map((item) => (
-                <button
-                  key={item.ratingKey}
-                  onClick={() => {
-                    setSelectedItem(item);
-                    setStep('details');
-                  }}
-                  className="library-tile snap-start shrink-0 bg-transparent border border-[rgba(255,255,255,0.1)] rounded-sharp p-2 hover:border-np-cyan transition-colors text-left"
-                  style={{ width: '180px' }}
-                >
-                  <PosterCard
-                    posterUrl={null}
-                    title={item.title}
-                    aspect="3/4"
-                    width={160}
-                    height={240}
-                    loading="lazy"
-                  />
-                  <div className="mt-2 flex flex-col gap-0.5">
-                    <span className="font-mono text-xs text-np-muted uppercase">{item.type}</span>
-                    <span className="font-mono text-sm text-np-fg line-clamp-2">
-                      {item.grandparentTitle
-                        ? `${item.grandparentTitle} — ${item.title}`
-                        : item.title}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     );
   }
 
-  // ---- Step: details ----
-  if (step === 'details') {
-    return (
-      <div>
-        <StepIndicator current={step} />
-        <div key="details" className="animate-enter">
-          <h2 className={heading}>Step 3 — Share Details</h2>
-          <button onClick={() => setStep('item')} className="btn-ghost text-xs">
-            ← Back
-          </button>
-
-          <p className="text-np-muted font-mono text-sm mt-4">
-            Sharing: <strong className="text-np-fg">{selectedItem?.title}</strong>
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-5 max-w-[480px]">
-            <EnvelopeField label="To" id="recipient_label">
-              <input
-                id="recipient_label"
-                required
-                value={recipientLabel}
-                onChange={(e) => setRecipientLabel(e.target.value)}
-                placeholder="Alice"
-              />
-            </EnvelopeField>
-            <EnvelopeField label="From" id="sender_label">
-              <input
-                id="sender_label"
-                maxLength={60}
-                value={senderLabel}
-                onChange={(e) => setSenderLabel(e.target.value)}
-                placeholder="Josh"
-              />
-            </EnvelopeField>
-            <EnvelopeField label="Note" id="recipient_note">
-              <textarea
-                id="recipient_note"
-                value={recipientNote}
-                onChange={(e) => setRecipientNote(e.target.value)}
-                placeholder="Optional private note"
-                rows={2}
-              />
-            </EnvelopeField>
-            <div className="grid grid-cols-2 gap-4">
-              <EnvelopeField label="TTL (hours)" id="ttl_hours">
-                <input
-                  id="ttl_hours"
-                  type="number"
-                  min={1}
-                  max={168}
-                  value={ttlHours}
-                  onChange={(e) => setTtlHours(e.target.value)}
-                />
-              </EnvelopeField>
-              <EnvelopeField label="Max plays" id="max_plays">
-                <input
-                  id="max_plays"
-                  type="number"
-                  min={1}
-                  value={maxPlays}
-                  onChange={(e) => setMaxPlays(e.target.value)}
-                  placeholder="Unlimited"
-                />
-              </EnvelopeField>
-            </div>
-
-            {submitError && <p className="text-np-magenta font-mono text-sm mb-3">{submitError}</p>}
-
-            <div>
-              <button
-                type="submit"
-                disabled={submitting || !recipientLabel.trim()}
-                className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Creating…' : 'Create Share'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
+  function renderStep(s: Step) {
+    if (s === 'library') return renderLibrary();
+    if (s === 'item') return renderItem();
+    if (s === 'details') return renderDetails();
+    if (s === 'done') return renderDone();
+    return null;
   }
 
-  // ---- Step: done ----
-  if (step === 'done' && result) {
-    return (
-      <div>
-        <StepIndicator current={step} />
-        <div key="done" className="animate-enter">
-          <h2 className="font-display uppercase tracking-wide text-lg text-np-green mb-4">
-            Share Created
-          </h2>
-          <p className="text-np-muted font-mono text-sm mb-4">
-            The share link is shown only once. Copy it now.
-          </p>
-
-          <GlassPanel className="p-4 mb-4">
-            <div className="font-mono break-all text-np-cyan text-sm">{result.shareUrl}</div>
-          </GlassPanel>
-
-          <div className="flex flex-wrap gap-3">
-            <button onClick={copyLink} className="btn-primary text-sm">
-              {copied ? 'Copied!' : 'Copy Link'}
-            </button>
-            <button
-              onClick={() => router.push(`/dashboard/shares/${result.id}`)}
-              className="btn-ghost text-sm"
-            >
-              View Share →
-            </button>
-            <button
-              onClick={() => {
-                setStep('library');
-                setSectionId('');
-                setItems([]);
-                setSelectedItem(null);
-                setItemQuery('');
-                setRecipientLabel('');
-                setRecipientNote('');
-                setSenderLabel('');
-                setTtlHours('48');
-                setMaxPlays('');
-                setResult(null);
-              }}
-              className="btn-ghost text-sm"
-            >
-              Create Another
-            </button>
+  return (
+    <div>
+      <StepIndicator current={step} />
+      <div className="wizard-stage">
+        {previous !== null && (
+          <div data-wizard-layer="exit" onAnimationEnd={handleExitEnd} key={`exit-${previous}`}>
+            {renderStep(previous)}
           </div>
+        )}
+        <div data-wizard-layer="enter" key={`enter-${step}`}>
+          {renderStep(step)}
         </div>
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
