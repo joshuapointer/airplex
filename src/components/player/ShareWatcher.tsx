@@ -53,6 +53,7 @@ export function ShareWatcher({ linkId, title, mediaType, rootRatingKey }: ShareW
         linkId={linkId}
         ratingKey={selectedRatingKey ?? rootRatingKey}
         title={title}
+        isShowEpisode={mediaType === 'show'}
         onBack={mediaType === 'show' ? () => setSelectedRatingKey(null) : undefined}
       />
     );
@@ -255,11 +256,13 @@ function Player({
   linkId,
   ratingKey,
   title,
+  isShowEpisode,
   onBack,
 }: {
   linkId: string;
   ratingKey: string;
   title: string;
+  isShowEpisode: boolean;
   onBack?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -274,8 +277,8 @@ function Player({
 
   const hlsUrl = useMemo(() => {
     const base = `/api/hls/${linkId}/index.m3u8`;
-    return `${base}?rk=${encodeURIComponent(ratingKey)}`;
-  }, [linkId, ratingKey]);
+    return isShowEpisode ? `${base}?rk=${encodeURIComponent(ratingKey)}` : base;
+  }, [linkId, ratingKey, isShowEpisode]);
 
   // Preload saved position so we can offer a "Resume" UI before playback
   // begins. We intentionally don't auto-seek — some players get confused if
