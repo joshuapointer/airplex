@@ -829,6 +829,21 @@ export function VideoPlayer({
         </button>
       ) : null}
 
+      {/* Floating info FAB — always visible so recipients discover the
+          details/queue panel even when the control bar is auto-hidden. */}
+      {onOpenPanel ? (
+        <button
+          type="button"
+          className="vp-info-fab"
+          onClick={onOpenPanel}
+          aria-label={panelOpen ? 'Close details panel' : 'Open details panel'}
+          aria-pressed={panelOpen}
+          data-active={panelOpen ? 'true' : 'false'}
+        >
+          <InfoIcon />
+        </button>
+      ) : null}
+
       {/* Overlay children (e.g. Up Next card) */}
       <div className="vp-overlay-top" data-visible={displayMode === 'showing' ? 'true' : 'false'}>
         {children}

@@ -828,6 +828,51 @@ body {
       min-width: 34px;
       min-height: 34px;
     }
+    /* Mobile control bar: wrap to a second row rather than letting the
+       tail buttons (info, fullscreen) overflow off-screen. */
+    .vp-row {
+      flex-wrap: wrap;
+      row-gap: 0.35rem;
+    }
+  }
+
+  /* Floating info button — top-right corner of the player, always visible
+     when started + not fullscreen. Gives recipients a one-tap entry to
+     the details panel without hunting in the auto-hiding control bar. */
+  .vp-info-fab {
+    position: absolute;
+    top: calc(0.75rem + env(safe-area-inset-top));
+    right: calc(0.75rem + env(safe-area-inset-right));
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    color: var(--np-fg);
+    border: 1px solid color-mix(in srgb, var(--np-green) 35%, transparent);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease,
+      opacity 180ms ease;
+  }
+  .vp-info-fab:hover,
+  .vp-info-fab:focus-visible {
+    background: rgba(0, 0, 0, 0.75);
+    border-color: color-mix(in srgb, var(--np-green) 70%, transparent);
+  }
+  .vp-info-fab[data-active='true'] {
+    color: var(--np-green);
+    border-color: var(--np-green);
+  }
+  .vp-info-fab[data-visible='false'] {
+    opacity: 0;
+    pointer-events: none;
   }
 
   /* ────────────────────────────────────────────────────────────────
