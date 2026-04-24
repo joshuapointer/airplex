@@ -28,7 +28,7 @@ export default async function PlexSetupPage({ searchParams }: SetupPageProps) {
     <main className="min-h-screen safe-top safe-bottom safe-x flex items-center justify-center bg-np-bg text-np-fg">
       <div className="w-full max-w-[520px] animate-enter">
         <h1 className="font-display uppercase tracking-[0.08em] text-2xl text-np-cyan mb-1">
-          airplex setup
+          airPointer setup
         </h1>
         <p className="text-sm text-np-muted font-mono mb-6">
           Connect your Plex account to begin sharing.

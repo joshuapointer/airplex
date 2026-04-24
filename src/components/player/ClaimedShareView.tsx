@@ -97,7 +97,7 @@ export function ClaimedShareView({
             style={{ zIndex: 3 }}
           >
             <header className="mb-6 flex items-center justify-between animate-enter">
-              <p className="text-np-green font-mono text-xs uppercase tracking-widest">airplex</p>
+              <p className="text-np-green font-mono text-xs uppercase tracking-widest">airPointer</p>
               <span className="badge">share</span>
             </header>
 

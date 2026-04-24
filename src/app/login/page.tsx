@@ -38,8 +38,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             className="font-display uppercase text-3xl tracking-wide"
             style={{ color: 'var(--np-cyan)' }}
           >
-            airplex
+            airPointer
           </h1>
+          <p className="text-xs font-mono uppercase tracking-widest text-np-muted -mt-1">
+            built by joshPointer
+          </p>
           <p className="text-sm text-np-muted">
             Sign in with your identity provider to manage share links.
           </p>

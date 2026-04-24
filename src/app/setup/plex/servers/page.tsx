@@ -41,7 +41,7 @@ export default async function PlexServersPage() {
           pick a server
         </h1>
         <p className="text-sm text-np-muted font-mono mb-6">
-          Choose the Plex Media Server airplex should stream from.
+          Choose the Plex Media Server airPointer should stream from.
         </p>
 
         {error ? (

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { FrameBrackets } from '@/components/ui/transmission';
 
 export const metadata: Metadata = {
-  title: 'airplex — already claimed',
+  title: 'airPointer — already claimed',
   referrer: 'no-referrer',
   robots: 'noindex,nofollow',
 };
@@ -20,7 +20,7 @@ export default function ClaimedPage() {
           aria-labelledby="claimed-heading"
         >
           {/* Brand */}
-          <p className="text-np-cyan font-mono text-xs uppercase tracking-widest mb-6">airplex</p>
+          <p className="text-np-cyan font-mono text-xs uppercase tracking-widest mb-6">airPointer</p>
 
           {/* Icon mark */}
           <div className="mb-5" aria-hidden="true">

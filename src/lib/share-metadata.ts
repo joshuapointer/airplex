@@ -17,7 +17,7 @@ import { hashShareToken, verifyShareTokenSignature } from '@/lib/share-token';
 import type { ShareRow } from '@/types/share';
 
 export const FALLBACK_SHARE_METADATA: Metadata = {
-  title: 'airplex',
+  title: 'airPointer',
   referrer: 'no-referrer',
   robots: 'noindex,nofollow',
 };
@@ -61,7 +61,7 @@ export function buildShareMetadata(token: string): Metadata {
       title: row.title,
       description,
       url: shareUrl,
-      siteName: 'airplex',
+      siteName: 'airPointer',
       type: ogType,
       images: row.poster_path
         ? [{ url: posterUrl, width: 600, height: 900, alt: row.title }]

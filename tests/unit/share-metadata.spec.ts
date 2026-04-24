@@ -77,7 +77,7 @@ describe('buildShareMetadata', () => {
     const og = md.openGraph as Record<string, unknown> | undefined;
     expect(og?.title).toBe('Blade Runner 2049');
     expect(og?.url).toBe(`http://localhost:3000/s/${token}`);
-    expect(og?.siteName).toBe('airplex');
+    expect(og?.siteName).toBe('airPointer');
     expect(og?.type).toBe('video.movie');
     const ogImages = og?.images as Array<{ url: string }> | undefined;
     expect(ogImages?.[0]?.url).toBe(`http://localhost:3000/api/share/${token}/poster`);

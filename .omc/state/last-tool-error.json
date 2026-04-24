@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"sudo sqlite3 /opt/airplex/data/airplex.db \\\"PRAGMA table_info(shares)\\\" 2>&1 | grep -E \\\"sender_label|poster_path|^[0-9]+\\\" | head -20 && echo --- && sudo sqlite3 /opt/airplex/data/airplex...",
-  "error": "Exit code 1\n0|id|TEXT|0||1\n1|token_hash|TEXT|1||0\n2|plex_rating_key|TEXT|1||0\n3|title|TEXT|1||0\n4|plex_media_type|TEXT|1||0\n5|recipient_label|TEXT|1||0\n6|recipient_note|TEXT|0||0\n7|created_at|INTEGER|1||0\n8|expires_at|INTEGER|1||0\n9|max_plays|INTEGER|0||0\n10|play_count|INTEGER|1|0|0\n11|device_fingerprint_hash|TEXT|0||0\n12|device_locked_at|INTEGER|0||0\n13|revoked_at|INTEGER|0||0\n14|created_by_sub|TEXT|1||0\n15|sender_label|TEXT|0||0\n16|poster_path|TEXT|0||0\n---\nParse error in 2nd command line argu...",
-  "timestamp": "2026-04-24T04:57:50.800Z",
-  "retry_count": 2
-}

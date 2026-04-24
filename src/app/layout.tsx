@@ -5,8 +5,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.APP_URL),
-  title: 'airplex',
-  description: 'Plex share-link service',
+  title: 'airPointer',
+  description: 'airPointer — built by joshPointer',
 };
 
 export const viewport: Viewport = {

@@ -154,7 +154,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
           <h1 className="font-display text-2xl sm:text-3xl uppercase tracking-wide mb-4 text-np-fg">
             {row.title}
           </h1>
-          <p className="text-np-muted">Shared via airplex</p>
+          <p className="text-np-muted">Shared via airPointer</p>
         </div>
       </main>
     );
@@ -211,7 +211,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
       >
         {/* Brand header */}
         <header className="mb-6 flex items-center justify-between animate-enter">
-          <p className="text-np-green font-mono text-xs uppercase tracking-widest">airplex</p>
+          <p className="text-np-green font-mono text-xs uppercase tracking-widest">airPointer</p>
           <span className="badge">share</span>
         </header>
 

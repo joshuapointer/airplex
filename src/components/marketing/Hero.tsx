@@ -6,11 +6,19 @@ export function Hero() {
     <section className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
       {/* Logo / headline */}
       <h1
-        className="text-7xl sm:text-8xl md:text-9xl font-display uppercase tracking-widest text-center mb-4 select-none"
+        className="text-7xl sm:text-8xl md:text-9xl font-display uppercase tracking-widest text-center mb-2 select-none"
         style={{ color: 'var(--np-cyan)', textShadow: '0 0 40px var(--np-cyan)' }}
       >
-        AIRPLEX
+        airPointer
       </h1>
+
+      {/* Byline */}
+      <p
+        className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-center mb-6"
+        style={{ color: 'var(--np-muted)' }}
+      >
+        built by joshPointer
+      </p>
 
       {/* Tagline */}
       <p

@@ -50,7 +50,7 @@ export function DashboardShell({
       {/* Mobile topbar (visible <md only) */}
       <header className="md:hidden glass flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.08)] rounded-none sticky top-0 z-20">
         <div className="font-display uppercase text-lg tracking-[0.08em] text-np-cyan">
-          <BrandFlicker>airplex</BrandFlicker>
+          <BrandFlicker>airPointer</BrandFlicker>
         </div>
         <button
           type="button"
@@ -103,7 +103,7 @@ export function DashboardShell({
         aria-hidden={!drawerOpen ? undefined : false}
       >
         <div className="font-display uppercase text-xl tracking-[0.08em] text-np-cyan mb-6 hidden md:block">
-          <BrandFlicker>airplex</BrandFlicker>
+          <BrandFlicker>airPointer</BrandFlicker>
         </div>
 
         <nav className="flex flex-col gap-1">

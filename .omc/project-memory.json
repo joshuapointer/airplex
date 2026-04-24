@@ -186,8 +186,20 @@
   "hotPaths": [
     {
       "path": "src/app/s/[token]/page.tsx",
-      "accessCount": 12,
-      "lastAccessed": 1777006368765,
+      "accessCount": 46,
+      "lastAccessed": 1777067041580,
+      "type": "file"
+    },
+    {
+      "path": "src/db/queries/shares.ts",
+      "accessCount": 18,
+      "lastAccessed": 1777065282701,
+      "type": "file"
+    },
+    {
+      "path": "src/auth/guards.ts",
+      "accessCount": 8,
+      "lastAccessed": 1777065470781,
       "type": "file"
     },
     {
@@ -197,33 +209,99 @@
       "type": "file"
     },
     {
-      "path": "src/db/queries/shares.ts",
-      "accessCount": 5,
-      "lastAccessed": 1777006256186,
+      "path": "src/lib/env.ts",
+      "accessCount": 7,
+      "lastAccessed": 1777060804252,
+      "type": "file"
+    },
+    {
+      "path": "src/app/api/hls/[link_id]/index.m3u8/route.ts",
+      "accessCount": 7,
+      "lastAccessed": 1777061885891,
       "type": "file"
     },
     {
       "path": "src/middleware.ts",
-      "accessCount": 4,
-      "lastAccessed": 1777006214394,
+      "accessCount": 7,
+      "lastAccessed": 1777065165677,
+      "type": "file"
+    },
+    {
+      "path": "src/app/dashboard/layout.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1777057436029,
       "type": "file"
     },
     {
       "path": "src/app/api/hls/[link_id]/seg/[...path]/route.ts",
+      "accessCount": 5,
+      "lastAccessed": 1777060315783,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/metadata.ts",
+      "accessCount": 5,
+      "lastAccessed": 1777060776644,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/client.ts",
+      "accessCount": 5,
+      "lastAccessed": 1777060777052,
+      "type": "file"
+    },
+    {
+      "path": "src/app/dashboard/page.tsx",
       "accessCount": 4,
-      "lastAccessed": 1777006215226,
+      "lastAccessed": 1777057137839,
       "type": "file"
     },
     {
       "path": "src/app/setup/plex/PlexSetupClient.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1777001963425,
+      "accessCount": 4,
+      "lastAccessed": 1777057138879,
+      "type": "file"
+    },
+    {
+      "path": "src/plex/hls-rewriter.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777060772375,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/device-lock.ts",
+      "accessCount": 4,
+      "lastAccessed": 1777065528933,
       "type": "file"
     },
     {
       "path": "src/db/migrate.ts",
       "accessCount": 3,
       "lastAccessed": 1777006220619,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/share-token.ts",
+      "accessCount": 3,
+      "lastAccessed": 1777054990177,
+      "type": "file"
+    },
+    {
+      "path": "next.config.ts",
+      "accessCount": 3,
+      "lastAccessed": 1777055062862,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1777057972719,
+      "type": "directory"
+    },
+    {
+      "path": "src/plex/transcode.ts",
+      "accessCount": 3,
+      "lastAccessed": 1777060082470,
       "type": "file"
     },
     {
@@ -251,18 +329,6 @@
       "type": "file"
     },
     {
-      "path": "src/plex/transcode.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777003300684,
-      "type": "file"
-    },
-    {
-      "path": "src/app/api/hls/[link_id]/index.m3u8/route.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777004019778,
-      "type": "file"
-    },
-    {
       "path": "scripts/migrate-runtime.cjs",
       "accessCount": 2,
       "lastAccessed": 1777004389090,
@@ -278,48 +344,6 @@
       "path": "package.json",
       "accessCount": 2,
       "lastAccessed": 1777004973935,
-      "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 2,
-      "lastAccessed": 1777005190795,
-      "type": "directory"
-    },
-    {
-      "path": "src/plex/metadata.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777006176893,
-      "type": "file"
-    },
-    {
-      "path": "src/plex/client.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777006177130,
-      "type": "file"
-    },
-    {
-      "path": "src/lib/share-token.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777006215517,
-      "type": "file"
-    },
-    {
-      "path": "src/auth/guards.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777006220692,
-      "type": "file"
-    },
-    {
-      "path": "src/plex/hls-rewriter.ts",
-      "accessCount": 2,
-      "lastAccessed": 1777006331624,
-      "type": "file"
-    },
-    {
-      "path": "next.config.ts",
-      "accessCount": 1,
-      "lastAccessed": 1776997439307,
       "type": "file"
     },
     {
@@ -356,18 +380,6 @@
       "path": "src/db/client.ts",
       "accessCount": 1,
       "lastAccessed": 1776997449965,
-      "type": "file"
-    },
-    {
-      "path": "src/lib/env.ts",
-      "accessCount": 1,
-      "lastAccessed": 1776997450337,
-      "type": "file"
-    },
-    {
-      "path": "src/lib/device-lock.ts",
-      "accessCount": 1,
-      "lastAccessed": 1776997451117,
       "type": "file"
     },
     {
@@ -440,18 +452,6 @@
       "path": "ansible/roles/airplex/tasks/00-preflight.yml",
       "accessCount": 1,
       "lastAccessed": 1776998187316,
-      "type": "file"
-    },
-    {
-      "path": "src/app/dashboard/page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776998691345,
-      "type": "file"
-    },
-    {
-      "path": "src/app/dashboard/layout.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776998769978,
       "type": "file"
     },
     {

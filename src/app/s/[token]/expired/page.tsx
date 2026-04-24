@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { FrameBrackets } from '@/components/ui/transmission';
 
 export const metadata: Metadata = {
-  title: 'airplex — link unavailable',
+  title: 'airPointer — link unavailable',
   referrer: 'no-referrer',
   robots: 'noindex,nofollow',
 };
@@ -64,7 +64,7 @@ export default async function ExpiredPage({
             className="font-mono text-xs uppercase tracking-widest mb-6"
             style={{ color: copy.accentColor }}
           >
-            airplex
+            airPointer
           </p>
 
           {/* Icon mark */}
