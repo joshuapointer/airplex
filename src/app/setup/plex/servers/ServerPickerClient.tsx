@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PlexConnection } from '@/plex/account';
+import { Badge } from '@/components/ui/Badge';
 
 export interface SetupServer {
   name: string;
@@ -22,8 +23,6 @@ function pickBestConnection(connections: PlexConnection[]): PlexConnection | nul
 }
 
 function rank(c: PlexConnection): number {
-  // Lower is better. Prefer https + !relay + !local (public direct),
-  // then https + !relay, then any https, then anything.
   if (c.https && !c.relay && !c.local) return 0;
   if (c.https && !c.relay) return 1;
   if (c.https) return 2;
@@ -65,82 +64,40 @@ export function ServerPickerClient({ csrf, servers }: ServerPickerClientProps) {
 
   if (servers.length === 0) {
     return (
-      <p style={{ color: 'var(--np-muted)', fontSize: '0.9rem' }}>
+      <p className="font-mono text-sm text-np-muted">
         No Plex Media Servers found on this account.
       </p>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      {error && (
-        <p
-          style={{
-            color: 'var(--np-magenta)',
-            fontSize: '0.85rem',
-            marginBottom: '0.25rem',
-          }}
-        >
-          {error}
-        </p>
-      )}
+    <div className="flex flex-col gap-3">
+      {error && <p className="font-mono text-sm text-np-magenta">{error}</p>}
       {servers.map((server) => {
         const best = pickBestConnection(server.connections);
         const isSelecting = selecting === server.name;
+        const disabled = !best || selecting !== null;
+        const dimmed = !best || (selecting !== null && !isSelecting);
         return (
           <button
             key={`${server.name}-${best?.uri ?? 'none'}`}
             type="button"
             onClick={() => select(server)}
-            disabled={!best || selecting !== null}
-            style={{
-              textAlign: 'left',
-              padding: '1rem',
-              background: 'rgba(15,15,15,0.75)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 'var(--np-radius-soft)',
-              color: 'var(--np-fg)',
-              cursor: best && selecting === null ? 'pointer' : 'not-allowed',
-              opacity: !best || (selecting !== null && !isSelecting) ? 0.5 : 1,
-            }}
+            disabled={disabled}
+            className="episode-row flex-col items-start gap-1.5"
+            style={dimmed ? { opacity: 0.5 } : undefined}
+            aria-label={`Select ${server.name}${server.owned ? ' (owned)' : ''}`}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '0.35rem',
-              }}
-            >
-              <span style={{ fontSize: '1rem' }}>{server.name}</span>
-              {server.owned && (
-                <span
-                  style={{
-                    padding: '0.05rem 0.4rem',
-                    fontSize: '0.65rem',
-                    fontFamily: 'var(--np-font-body)',
-                    color: 'var(--np-green)',
-                    border: '1px solid var(--np-green)',
-                    borderRadius: 'var(--np-radius-sharp)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                  }}
-                >
-                  Owned
-                </span>
-              )}
-            </div>
-            <div
-              style={{
-                fontSize: '0.75rem',
-                fontFamily: 'var(--np-font-body)',
-                color: 'var(--np-muted)',
-                wordBreak: 'break-all',
-              }}
-            >
+            <span className="flex items-center gap-2">
+              <span className="font-display text-base uppercase tracking-wide text-np-fg">
+                {server.name}
+              </span>
+              {server.owned && <Badge status="active">Owned</Badge>}
+            </span>
+            <span className="font-mono text-xs text-np-muted break-all">
               {best ? best.uri : 'No connections available'}
               {isSelecting ? ' — selecting…' : ''}
-            </div>
+            </span>
           </button>
         );
       })}

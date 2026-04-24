@@ -1,32 +1,14 @@
 import { NewShareForm } from '@/components/dashboard/NewShareForm';
+import { GlassPanel } from '@/components/ui/GlassPanel';
 
 export default function NewSharePage() {
   return (
-    <div>
-      <h1
-        style={{
-          fontFamily: 'var(--np-font-display)',
-          color: 'var(--np-cyan)',
-          fontSize: '1.5rem',
-          fontWeight: 700,
-          marginBottom: '1.5rem',
-        }}
-      >
-        New Share
-      </h1>
+    <div className="animate-enter">
+      <h1 className="font-display uppercase tracking-wide text-2xl text-np-cyan mb-6">New Share</h1>
 
-      <div
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid var(--np-muted)',
-          borderRadius: 'var(--np-radius-soft)',
-          padding: '1.5rem',
-          backdropFilter: 'blur(8px)',
-          maxWidth: '600px',
-        }}
-      >
+      <GlassPanel className="p-6 max-w-[640px]">
         <NewShareForm />
-      </div>
+      </GlassPanel>
     </div>
   );
 }

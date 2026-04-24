@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { PlexDirectory } from '@/types/plex';
 import { useCsrf } from './CsrfContext';
+import { Select } from '@/components/ui/Select';
 
 interface LibraryPickerProps {
   value: string;
@@ -47,30 +48,19 @@ export function LibraryPicker({ value, onChange, disabled }: LibraryPickerProps)
   }, [csrf]);
 
   if (loading) {
-    return (
-      <span style={{ color: 'var(--np-muted)', fontSize: '0.85rem' }}>Loading libraries…</span>
-    );
+    return <span className="font-mono text-sm text-np-muted">Loading libraries…</span>;
   }
 
   if (error) {
-    return <span style={{ color: 'var(--np-magenta)', fontSize: '0.85rem' }}>{error}</span>;
+    return <span className="font-mono text-sm text-np-magenta">{error}</span>;
   }
 
   return (
-    <select
+    <Select
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      style={{
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid var(--np-muted)',
-        borderRadius: 'var(--np-radius-sharp)',
-        color: 'var(--np-fg)',
-        padding: '0.45rem 0.75rem',
-        width: '100%',
-        fontSize: '0.9rem',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-      }}
+      label="Library"
     >
       <option value="">— Select library —</option>
       {libraries.map((lib) => (
@@ -78,6 +68,6 @@ export function LibraryPicker({ value, onChange, disabled }: LibraryPickerProps)
           {lib.title} ({lib.type})
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

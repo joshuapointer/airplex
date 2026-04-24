@@ -143,6 +143,34 @@ body {
     box-shadow: var(--np-glow-green);
   }
 
+  /* ── Dashboard sidebar nav link ── */
+  .nav-link {
+    display: block;
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--np-radius-sharp);
+    color: var(--np-fg);
+    text-decoration: none;
+    font-family: var(--np-font-body);
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+    transition:
+      background 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      color 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      border-color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-link:hover {
+      background: rgba(0, 240, 255, 0.06);
+      color: var(--np-cyan);
+    }
+  }
+  .nav-link[aria-current='page'] {
+    background: rgba(0, 240, 255, 0.08);
+    color: var(--np-cyan);
+    border-color: rgba(0, 240, 255, 0.25);
+  }
+
   /* ── Season selector tab ── */
   .season-tab {
     display: inline-flex;

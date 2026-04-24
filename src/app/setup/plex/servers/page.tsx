@@ -35,55 +35,23 @@ export default async function PlexServersPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'var(--np-bg)',
-        color: 'var(--np-fg)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: '620px' }}>
-        <h1
-          style={{
-            fontFamily: 'var(--np-font-display)',
-            color: 'var(--np-cyan)',
-            fontSize: '1.6rem',
-            letterSpacing: '0.08em',
-            marginBottom: '0.25rem',
-          }}
-        >
+    <main className="min-h-screen safe-top safe-bottom safe-x flex items-center justify-center bg-np-bg text-np-fg">
+      <div className="w-full max-w-[620px] animate-enter">
+        <h1 className="font-display uppercase tracking-[0.08em] text-2xl text-np-cyan mb-1">
           pick a server
         </h1>
-        <p
-          style={{
-            color: 'var(--np-muted)',
-            fontSize: '0.85rem',
-            marginBottom: '1.5rem',
-          }}
-        >
+        <p className="text-sm text-np-muted font-mono mb-6">
           Choose the Plex Media Server airplex should stream from.
         </p>
 
         {error ? (
-          <div
-            style={{
-              padding: '0.75rem 1rem',
-              border: '1px solid var(--np-magenta)',
-              borderRadius: 'var(--np-radius-sharp)',
-              color: 'var(--np-magenta)',
-              fontSize: '0.85rem',
-            }}
-          >
+          <div className="px-4 py-3 border border-np-magenta rounded-sharp text-np-magenta font-mono text-sm bg-np-magenta/10">
             {error}
           </div>
         ) : (
           <ServerPickerClient csrf={session.csrf} servers={servers} />
         )}
       </div>
-    </div>
+    </main>
   );
 }

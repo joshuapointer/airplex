@@ -21,29 +21,14 @@ export default async function ShareDetailPage({ params }: ShareDetailPageProps) 
   const status = computeShareStatus(row);
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.25rem' }}>
-        <Link
-          href="/dashboard/shares"
-          style={{
-            color: 'var(--np-muted)',
-            textDecoration: 'none',
-            fontSize: '0.85rem',
-          }}
-        >
+    <div className="animate-enter">
+      <div className="mb-5">
+        <Link href="/dashboard/shares" className="btn-ghost text-xs">
           ← Back to Shares
         </Link>
       </div>
 
-      <h1
-        style={{
-          fontFamily: 'var(--np-font-display)',
-          color: 'var(--np-cyan)',
-          fontSize: '1.5rem',
-          fontWeight: 700,
-          marginBottom: '1.5rem',
-        }}
-      >
+      <h1 className="font-display uppercase tracking-wide text-2xl text-np-cyan mb-6">
         Share Detail
       </h1>
 

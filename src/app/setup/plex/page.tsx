@@ -25,51 +25,17 @@ export default async function PlexSetupPage({ searchParams }: SetupPageProps) {
   const serverUrl = configured ? getPlexBaseUrl() : null;
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'var(--np-bg)',
-        color: 'var(--np-fg)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: '520px' }}>
-        <h1
-          style={{
-            fontFamily: 'var(--np-font-display)',
-            color: 'var(--np-cyan)',
-            fontSize: '1.6rem',
-            letterSpacing: '0.08em',
-            marginBottom: '0.25rem',
-          }}
-        >
+    <main className="min-h-screen safe-top safe-bottom safe-x flex items-center justify-center bg-np-bg text-np-fg">
+      <div className="w-full max-w-[520px] animate-enter">
+        <h1 className="font-display uppercase tracking-[0.08em] text-2xl text-np-cyan mb-1">
           airplex setup
         </h1>
-        <p
-          style={{
-            color: 'var(--np-muted)',
-            fontSize: '0.85rem',
-            marginBottom: '1.5rem',
-          }}
-        >
+        <p className="text-sm text-np-muted font-mono mb-6">
           Connect your Plex account to begin sharing.
         </p>
 
         {errorMessage && (
-          <div
-            style={{
-              marginBottom: '1rem',
-              padding: '0.75rem 1rem',
-              border: '1px solid var(--np-magenta)',
-              borderRadius: 'var(--np-radius-sharp)',
-              color: 'var(--np-magenta)',
-              fontSize: '0.85rem',
-              background: 'rgba(255,0,128,0.06)',
-            }}
-          >
+          <div className="mb-4 px-4 py-3 border border-np-magenta rounded-sharp text-np-magenta font-mono text-sm bg-np-magenta/10">
             {errorMessage}
           </div>
         )}
@@ -82,6 +48,6 @@ export default async function PlexSetupPage({ searchParams }: SetupPageProps) {
           plexClientId={env.PLEX_CLIENT_IDENTIFIER}
         />
       </div>
-    </div>
+    </main>
   );
 }

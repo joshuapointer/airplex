@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import type { PlexMetadata } from '@/types/plex';
 import { LibraryPicker } from './LibraryPicker';
 import { useCsrf } from './CsrfContext';
+import { GlassPanel } from '@/components/ui/GlassPanel';
+import { Input } from '@/components/ui/Input';
 
 type Step = 'library' | 'item' | 'details' | 'done';
 
@@ -12,6 +14,30 @@ interface CreateResult {
   id: string;
   token: string;
   shareUrl: string;
+}
+
+const STEPS: { key: Step; label: string }[] = [
+  { key: 'library', label: '1 · Library' },
+  { key: 'item', label: '2 · Item' },
+  { key: 'details', label: '3 · Details' },
+  { key: 'done', label: '4 · Done' },
+];
+
+function StepIndicator({ current }: { current: Step }) {
+  const currentIdx = STEPS.findIndex((s) => s.key === current);
+  return (
+    <div className="flex flex-wrap gap-2 mb-6">
+      {STEPS.map((s, i) => (
+        <span
+          key={s.key}
+          className="season-tab"
+          aria-selected={i === currentIdx ? 'true' : 'false'}
+        >
+          {s.label}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 export function NewShareForm() {
@@ -108,25 +134,30 @@ export function NewShareForm() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  const heading = 'font-display uppercase tracking-wide text-lg text-np-cyan mb-4';
+  const textareaCls =
+    'w-full rounded-sharp border px-3 py-2 text-sm font-mono text-np-fg placeholder-np-muted bg-[var(--np-input-bg,rgba(0,0,0,0.4))] border-[rgba(255,255,255,0.12)] outline-none focus:border-np-green focus:ring-1 focus:ring-np-green transition-colors resize-y';
+
   // ---- Step: library ----
   if (step === 'library') {
     return (
       <div>
-        <h2 style={headingStyle}>Step 1 — Pick a Library</h2>
-        <div style={{ maxWidth: '400px' }}>
-          <LibraryPicker value={sectionId} onChange={setSectionId} disabled={itemsLoading} />
-          {itemsError && (
-            <p style={{ color: 'var(--np-magenta)', marginTop: '0.5rem', fontSize: '0.85rem' }}>
-              {itemsError}
-            </p>
-          )}
-          <button
-            onClick={() => loadItems(sectionId)}
-            disabled={!sectionId || itemsLoading}
-            style={primaryBtnStyle(!sectionId || itemsLoading)}
-          >
-            {itemsLoading ? 'Loading…' : 'Next →'}
-          </button>
+        <StepIndicator current={step} />
+        <div key="library" className="animate-enter">
+          <h2 className={heading}>Step 1 — Pick a Library</h2>
+          <div className="max-w-[400px] flex flex-col gap-3">
+            <LibraryPicker value={sectionId} onChange={setSectionId} disabled={itemsLoading} />
+            {itemsError && <p className="text-np-magenta font-mono text-sm">{itemsError}</p>}
+            <div>
+              <button
+                onClick={() => loadItems(sectionId)}
+                disabled={!sectionId || itemsLoading}
+                className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {itemsLoading ? 'Loading…' : 'Next →'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -136,53 +167,37 @@ export function NewShareForm() {
   if (step === 'item') {
     return (
       <div>
-        <h2 style={headingStyle}>Step 2 — Pick an Item</h2>
-        <button onClick={() => setStep('library')} style={ghostBtnStyle}>
-          ← Back
-        </button>
-        <div
-          style={{
-            marginTop: '1rem',
-            maxHeight: '400px',
-            overflowY: 'auto',
-            border: '1px solid var(--np-muted)',
-            borderRadius: 'var(--np-radius-soft)',
-          }}
-        >
-          {items.length === 0 ? (
-            <p style={{ padding: '1rem', color: 'var(--np-muted)', fontSize: '0.85rem' }}>
-              No items found in this library.
-            </p>
-          ) : (
-            items.map((item) => (
-              <button
-                key={item.ratingKey}
-                onClick={() => {
-                  setSelectedItem(item);
-                  setStep('details');
-                }}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '0.6rem 1rem',
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: '1px solid rgba(255,255,255,0.05)',
-                  color: 'var(--np-fg)',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                }}
-              >
-                <span style={{ color: 'var(--np-cyan)', marginRight: '0.5rem' }}>
-                  [{item.type}]
-                </span>
-                {item.grandparentTitle
-                  ? `${item.grandparentTitle} — ${item.parentTitle ?? ''} — ${item.title}`
-                  : item.title}
-              </button>
-            ))
-          )}
+        <StepIndicator current={step} />
+        <div key="item" className="animate-enter">
+          <h2 className={heading}>Step 2 — Pick an Item</h2>
+          <button onClick={() => setStep('library')} className="btn-ghost text-xs mb-4">
+            ← Back
+          </button>
+          <GlassPanel className="max-h-[400px] overflow-y-auto p-2 flex flex-col gap-1">
+            {items.length === 0 ? (
+              <p className="p-4 text-np-muted font-mono text-sm">No items found in this library.</p>
+            ) : (
+              items.map((item) => (
+                <button
+                  key={item.ratingKey}
+                  onClick={() => {
+                    setSelectedItem(item);
+                    setStep('details');
+                  }}
+                  className="episode-row text-sm"
+                >
+                  <span>
+                    <span className="text-np-cyan mr-2 font-mono text-xs uppercase">
+                      [{item.type}]
+                    </span>
+                    {item.grandparentTitle
+                      ? `${item.grandparentTitle} — ${item.parentTitle ?? ''} — ${item.title}`
+                      : item.title}
+                  </span>
+                </button>
+              ))
+            )}
+          </GlassPanel>
         </div>
       </div>
     );
@@ -192,82 +207,82 @@ export function NewShareForm() {
   if (step === 'details') {
     return (
       <div>
-        <h2 style={headingStyle}>Step 3 — Share Details</h2>
-        <button onClick={() => setStep('item')} style={ghostBtnStyle}>
-          ← Back
-        </button>
+        <StepIndicator current={step} />
+        <div key="details" className="animate-enter">
+          <h2 className={heading}>Step 3 — Share Details</h2>
+          <button onClick={() => setStep('item')} className="btn-ghost text-xs">
+            ← Back
+          </button>
 
-        <p style={{ color: 'var(--np-muted)', fontSize: '0.85rem', marginTop: '0.75rem' }}>
-          Sharing: <strong style={{ color: 'var(--np-fg)' }}>{selectedItem?.title}</strong>
-        </p>
+          <p className="text-np-muted font-mono text-sm mt-4">
+            Sharing: <strong className="text-np-fg">{selectedItem?.title}</strong>
+          </p>
 
-        <form onSubmit={handleSubmit} style={{ marginTop: '1.25rem', maxWidth: '480px' }}>
-          <Field label="Recipient label *">
-            <input
+          <form onSubmit={handleSubmit} className="mt-5 max-w-[480px] flex flex-col gap-4">
+            <Input
+              label="Recipient label *"
               required
               value={recipientLabel}
               onChange={(e) => setRecipientLabel(e.target.value)}
               placeholder="e.g. Alice"
-              style={inputStyle}
             />
-          </Field>
 
-          <Field label="From (shown to recipient, optional)">
-            <input
+            <Input
+              label="From (shown to recipient, optional)"
               maxLength={60}
               value={senderLabel}
               onChange={(e) => setSenderLabel(e.target.value)}
               placeholder="e.g. Josh"
-              style={inputStyle}
             />
-          </Field>
 
-          <Field label="Note (optional)">
-            <textarea
-              value={recipientNote}
-              onChange={(e) => setRecipientNote(e.target.value)}
-              placeholder="Private note about this share"
-              rows={2}
-              style={{ ...inputStyle, resize: 'vertical' }}
-            />
-          </Field>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="recipient-note"
+                className="text-xs font-mono uppercase tracking-wider text-np-muted"
+              >
+                Note (optional)
+              </label>
+              <textarea
+                id="recipient-note"
+                value={recipientNote}
+                onChange={(e) => setRecipientNote(e.target.value)}
+                placeholder="Private note about this share"
+                rows={2}
+                className={textareaCls}
+              />
+            </div>
 
-          <Field label="TTL (hours)">
-            <input
+            <Input
+              label="TTL (hours)"
               type="number"
               min={1}
               max={168}
               value={ttlHours}
               onChange={(e) => setTtlHours(e.target.value)}
-              style={inputStyle}
             />
-          </Field>
 
-          <Field label="Max plays (blank = unlimited)">
-            <input
+            <Input
+              label="Max plays (blank = unlimited)"
               type="number"
               min={1}
               value={maxPlays}
               onChange={(e) => setMaxPlays(e.target.value)}
               placeholder="Unlimited"
-              style={inputStyle}
             />
-          </Field>
 
-          {submitError && (
-            <p style={{ color: 'var(--np-magenta)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>
-              {submitError}
-            </p>
-          )}
+            {submitError && <p className="text-np-magenta font-mono text-sm">{submitError}</p>}
 
-          <button
-            type="submit"
-            disabled={submitting || !recipientLabel.trim()}
-            style={primaryBtnStyle(submitting || !recipientLabel.trim())}
-          >
-            {submitting ? 'Creating…' : 'Create Share'}
-          </button>
-        </form>
+            <div>
+              <button
+                type="submit"
+                disabled={submitting || !recipientLabel.trim()}
+                className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Creating…' : 'Create Share'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     );
   }
@@ -276,123 +291,51 @@ export function NewShareForm() {
   if (step === 'done' && result) {
     return (
       <div>
-        <h2 style={{ ...headingStyle, color: 'var(--np-green)' }}>Share Created</h2>
-        <p style={{ color: 'var(--np-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
-          The share link is shown only once. Copy it now.
-        </p>
+        <StepIndicator current={step} />
+        <div key="done" className="animate-enter">
+          <h2 className="font-display uppercase tracking-wide text-lg text-np-green mb-4">
+            Share Created
+          </h2>
+          <p className="text-np-muted font-mono text-sm mb-4">
+            The share link is shown only once. Copy it now.
+          </p>
 
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid var(--np-muted)',
-            borderRadius: 'var(--np-radius-sharp)',
-            padding: '0.75rem 1rem',
-            fontFamily: 'var(--np-font-body)',
-            fontSize: '0.8rem',
-            wordBreak: 'break-all',
-            color: 'var(--np-cyan)',
-            marginBottom: '1rem',
-          }}
-        >
-          {result.shareUrl}
-        </div>
+          <GlassPanel className="p-4 mb-4">
+            <div className="font-mono break-all text-np-cyan text-sm">{result.shareUrl}</div>
+          </GlassPanel>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button onClick={copyLink} style={primaryBtnStyle(false)}>
-            {copied ? 'Copied!' : 'Copy Link'}
-          </button>
-          <button
-            onClick={() => router.push(`/dashboard/shares/${result.id}`)}
-            style={ghostBtnStyle}
-          >
-            View Share →
-          </button>
-          <button
-            onClick={() => {
-              setStep('library');
-              setSectionId('');
-              setItems([]);
-              setSelectedItem(null);
-              setRecipientLabel('');
-              setRecipientNote('');
-              setSenderLabel('');
-              setTtlHours('48');
-              setMaxPlays('');
-              setResult(null);
-            }}
-            style={ghostBtnStyle}
-          >
-            Create Another
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={copyLink} className="btn-primary text-sm">
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
+            <button
+              onClick={() => router.push(`/dashboard/shares/${result.id}`)}
+              className="btn-ghost text-sm"
+            >
+              View Share →
+            </button>
+            <button
+              onClick={() => {
+                setStep('library');
+                setSectionId('');
+                setItems([]);
+                setSelectedItem(null);
+                setRecipientLabel('');
+                setRecipientNote('');
+                setSenderLabel('');
+                setTtlHours('48');
+                setMaxPlays('');
+                setResult(null);
+              }}
+              className="btn-ghost text-sm"
+            >
+              Create Another
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return null;
-}
-
-// ---- Shared style helpers ----
-
-const headingStyle: React.CSSProperties = {
-  fontFamily: 'var(--np-font-display)',
-  color: 'var(--np-cyan)',
-  fontSize: '1.1rem',
-  fontWeight: 700,
-  marginBottom: '1rem',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid var(--np-muted)',
-  borderRadius: 'var(--np-radius-sharp)',
-  color: 'var(--np-fg)',
-  padding: '0.45rem 0.75rem',
-  fontSize: '0.9rem',
-  boxSizing: 'border-box',
-};
-
-function primaryBtnStyle(disabled: boolean): React.CSSProperties {
-  return {
-    marginTop: '1rem',
-    padding: '0.5rem 1.25rem',
-    background: disabled ? 'rgba(255,255,255,0.1)' : 'var(--np-cyan)',
-    color: disabled ? 'var(--np-muted)' : 'var(--np-bg)',
-    border: 'none',
-    borderRadius: 'var(--np-radius-sharp)',
-    fontWeight: 700,
-    fontSize: '0.9rem',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-  };
-}
-
-const ghostBtnStyle: React.CSSProperties = {
-  marginTop: '1rem',
-  padding: '0.5rem 1rem',
-  background: 'transparent',
-  color: 'var(--np-cyan)',
-  border: '1px solid var(--np-cyan)',
-  borderRadius: 'var(--np-radius-sharp)',
-  fontWeight: 600,
-  fontSize: '0.85rem',
-  cursor: 'pointer',
-};
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: '1rem' }}>
-      <label
-        style={{
-          display: 'block',
-          fontSize: '0.8rem',
-          color: 'var(--np-muted)',
-          marginBottom: '0.3rem',
-        }}
-      >
-        {label}
-      </label>
-      {children}
-    </div>
-  );
 }
