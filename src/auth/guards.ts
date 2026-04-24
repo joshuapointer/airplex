@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { getIronSession } from 'iron-session';
+import { headers } from 'next/headers';
 import { env } from '@/lib/env';
 import { getAdminSession, type AdminSessionData } from '@/lib/session';
-import { ironConfigFor, type DeviceLockCookiePayload } from '@/lib/device-lock';
+import { computeDeviceFp } from '@/lib/device-lock';
 import { getShareById, computeShareStatus } from '@/db/queries/shares';
 import type { ShareRow } from '@/types/share';
 
@@ -46,8 +45,11 @@ export async function requireAdmin(returnTo?: string): Promise<AdminSessionData>
 
 /**
  * Gate a share-scoped request. Loads the row, checks status, and (if the
- * share is device-locked) verifies the per-link iron-session cookie.
- * Throws a `NextResponse` with the appropriate status on any failure.
+ * share is already claimed) verifies the request's recomputed device
+ * fingerprint matches the stored hash. The fingerprint is derived from the
+ * current User-Agent + Accept-Language + DEVICE_LOCK_SECRET — there is no
+ * session cookie. A browser whose UA string changes (e.g. after a software
+ * update) will fail the check; admin can reset from the dashboard.
  */
 export async function requireShareAccess(req: Request, linkId: string): Promise<ShareRow> {
   const row = getShareById(linkId);
@@ -61,19 +63,18 @@ export async function requireShareAccess(req: Request, linkId: string): Promise<
   }
 
   if (row.device_fingerprint_hash) {
-    const now = Math.floor(Date.now() / 1000);
-    // Null expires_at = never-expires share; cap the cookie at 30d so the
-    // session cookie still rotates periodically.
-    const ttlSeconds = row.expires_at === null ? 30 * 86400 : Math.max(60, row.expires_at - now);
-    const cookieStore = await cookies();
-    const deviceSession = await getIronSession<DeviceLockCookiePayload>(
-      cookieStore,
-      ironConfigFor(linkId, ttlSeconds),
-    );
-    if (!deviceSession.device_fp || deviceSession.device_fp !== row.device_fingerprint_hash) {
-      // `req` is accepted for signature parity with the plan (§A.9) and
-      // future use (e.g. IP-based logging); not consumed here.
-      void req;
+    // Prefer the Request's own headers (available in Route Handlers) and
+    // fall back to next/headers for Server Components / Server Actions
+    // that forward an empty synthetic Request.
+    let ua = req.headers.get('user-agent') ?? '';
+    let acceptLang = req.headers.get('accept-language') ?? '';
+    if (ua.length === 0 && acceptLang.length === 0) {
+      const h = await headers();
+      ua = h.get('user-agent') ?? '';
+      acceptLang = h.get('accept-language') ?? '';
+    }
+    const fp = computeDeviceFp(ua, acceptLang);
+    if (fp !== row.device_fingerprint_hash) {
       throw NextResponse.json({ error: 'forbidden' }, { status: 403 });
     }
   }
