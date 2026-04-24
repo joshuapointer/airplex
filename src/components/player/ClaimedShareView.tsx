@@ -163,17 +163,16 @@ export function ClaimedShareView({
       ) : null}
 
       {/* Watching view — mounted once and kept mounted so playback state
-          survives hero↔watching transitions. Hidden via CSS when not active. */}
+          survives hero↔watching transitions. Hidden via CSS when not active.
+          Landscape: full-viewport Netflix-style player + right-drawer panel.
+          Portrait: stacked player on top, panel content inline below. */}
       {everWatched ? (
         <section
           aria-hidden={!isWatching}
-          className="relative"
-          style={{
-            display: isWatching ? 'block' : 'none',
-            zIndex: 3,
-          }}
+          className="watching-stage"
+          data-active={isWatching ? 'true' : 'false'}
         >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
+          <div className="watching-topbar">
             <button
               type="button"
               onClick={exitWatching}
@@ -183,7 +182,7 @@ export function ClaimedShareView({
               ← Back
             </button>
           </div>
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-10">
+          <div className="watching-body">
             <ShareWatcher
               linkId={linkId}
               title={title}

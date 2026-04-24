@@ -464,10 +464,11 @@ function Player({
     return () => window.removeEventListener('pagehide', onPageHide);
   }, [saveProgress]);
 
-  // Populate resume map for the side-panel queue whenever the panel opens.
-  // Single batch round-trip — no per-episode waterfall.
+  // Populate resume map for the side-panel queue. Always fetch for shows —
+  // portrait mode renders the queue inline, so gating on panelOpen would
+  // leave the inline view without resume badges.
   useEffect(() => {
-    if (!isShowEpisode || !panelOpen) return;
+    if (!isShowEpisode) return;
     const controller = new AbortController();
     (async () => {
       try {
@@ -490,7 +491,7 @@ function Player({
       }
     })();
     return () => controller.abort();
-  }, [isShowEpisode, linkId, panelOpen]);
+  }, [isShowEpisode, linkId]);
 
   return (
     <div className="player-shell" data-panel-open={panelOpen ? 'true' : 'false'}>

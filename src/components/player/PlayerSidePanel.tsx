@@ -71,10 +71,11 @@ export function PlayerSidePanel({
   // on close so keyboard users return to the info button / control bar.
   const prevFocusRef = useRef<HTMLElement | null>(null);
 
-  // Fetch metadata whenever the panel opens OR the active rating key changes
-  // while open. Skip if we already have data for this key.
+  // Fetch metadata whenever the rating key changes. We don't gate on
+  // `open` because portrait mode renders the panel inline below the
+  // player (always visible) — only the landscape drawer hides until
+  // toggled. Skip if we already have data for this key.
   useEffect(() => {
-    if (!open) return;
     if (fetchedKeyRef.current === ratingKey) return;
 
     const controller = new AbortController();

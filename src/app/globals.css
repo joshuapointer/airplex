@@ -1278,6 +1278,45 @@ body {
       var(--np-ease-deco, cubic-bezier(0.22, 0.61, 0.36, 1)) forwards;
   }
 
+  /* ── Watching stage ───────────────────────────────────────────
+     Landscape (desktop + mobile rotated): full-viewport Netflix-style
+     video experience, panel slides in from the right as a drawer.
+     Portrait (phone upright): stacked — player on top, details panel
+     rendered inline below like Netflix's mobile detail page. */
+  .watching-stage {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+  }
+  .watching-stage[data-active='false'] {
+    display: none;
+  }
+  .watching-topbar {
+    padding: 0.75rem 1rem;
+    flex-shrink: 0;
+  }
+  .watching-body {
+    flex: 1;
+    min-height: 0;
+  }
+
+  @media (orientation: landscape) {
+    .watching-stage[data-active='true'] {
+      position: fixed;
+      inset: 0;
+      background: var(--np-bg);
+      z-index: 50;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+    .watching-topbar {
+      padding: 0.5rem 0.75rem 0 0.75rem;
+    }
+  }
+
   /* ── Player shell (persistent brackets around <VideoPlayer>) ── */
   .player-shell {
     position: relative;
@@ -1285,6 +1324,39 @@ body {
   .player-shell > .frame-brackets {
     pointer-events: none;
     z-index: 1;
+  }
+  /* Landscape full-bleed: player fills the remaining viewport height.
+     vp-root inside .player-shell picks up flex:1 via the stage container. */
+  @media (orientation: landscape) {
+    .watching-stage[data-active='true'] .watching-body {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .watching-stage[data-active='true'] .player-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .watching-stage[data-active='true'] .player-stage {
+      flex: 1;
+      min-height: 0;
+    }
+    .watching-stage[data-active='true'] .vp-root {
+      height: 100%;
+    }
+  }
+  /* Portrait stacked: video locks to 16:9 at top, panel flows below.
+     Hide the brackets decoration to avoid cropping on narrow widths. */
+  @media (orientation: portrait) {
+    .watching-stage .player-shell > .frame-brackets {
+      display: none;
+    }
+    .watching-stage .vp-root {
+      aspect-ratio: 16 / 9;
+      max-height: 56vh;
+    }
   }
 
   /* Player stage wraps the video + above-player controls. On wide screens
@@ -1346,6 +1418,33 @@ body {
   }
   @media (min-width: 1024px) {
     .player-panel-scrim {
+      display: none;
+    }
+  }
+
+  /* Portrait mode: panel flows inline below the player like a Netflix
+     detail page. No drawer, no scrim, no FAB — just stacked content. */
+  @media (orientation: portrait) {
+    .player-side-panel {
+      position: static;
+      transform: none;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      min-height: 55vh;
+      border-left: none;
+      border-top: 1px solid color-mix(in srgb, var(--np-green) 30%, transparent);
+      box-shadow: none;
+      pointer-events: auto;
+      z-index: auto;
+    }
+    .player-panel-scrim {
+      display: none !important;
+    }
+    .player-panel-close {
+      display: none;
+    }
+    .vp-info-fab {
       display: none;
     }
   }
