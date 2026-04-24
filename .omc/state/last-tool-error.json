@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"sudo docker exec airplex node -e '\\nconst Database=require(\\\"better-sqlite3\\\");\\nconst db=new Database(\\\"/data/airplex.db\\\");\\nconst rows=db.prepare(\\\"SELECT share_id, kind, created_at, us...",
-  "error": "Exit code 1\n/app/node_modules/better-sqlite3/lib/methods/wrappers.js:5\n\treturn this[cppdb].prepare(sql, this, false);\n\t                   ^\n\nSqliteError: no such column: created_at\n    at Database.prepare (/app/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)\n    at [eval]:4:15\n    at runScriptInThisContext (node:internal/vm:209:10)\n    at node:internal/process/execution:446:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:444:60)\n    at evalFunct...",
-  "timestamp": "2026-04-24T03:51:25.935Z",
-  "retry_count": 1
-}
