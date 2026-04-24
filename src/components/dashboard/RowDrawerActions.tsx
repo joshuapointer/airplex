@@ -60,8 +60,7 @@ export function RowDrawerActions({ share, csrf, onRefresh }: DrawerActionsProps)
       <div className="flex gap-2 flex-wrap">
         <button
           type="button"
-          className="btn-ghost text-xs"
-          style={{ color: 'var(--np-magenta)', borderColor: 'rgba(255, 40, 140, 0.4)' }}
+          className="btn-danger text-xs"
           disabled={busy !== null}
           onClick={(e) => {
             e.stopPropagation();
@@ -73,8 +72,7 @@ export function RowDrawerActions({ share, csrf, onRefresh }: DrawerActionsProps)
         </button>
         <button
           type="button"
-          className="btn-ghost text-xs"
-          style={{ color: 'var(--np-cyan)', borderColor: 'rgba(0, 240, 255, 0.4)' }}
+          className="btn-cyan text-xs"
           disabled={busy !== null}
           onClick={(e) => {
             e.stopPropagation();
@@ -85,8 +83,7 @@ export function RowDrawerActions({ share, csrf, onRefresh }: DrawerActionsProps)
         </button>
         <button
           type="button"
-          className="btn-ghost text-xs"
-          style={{ color: 'var(--np-green)', borderColor: 'rgba(0, 255, 102, 0.4)' }}
+          className="btn-primary text-xs"
           disabled={busy !== null}
           onClick={(e) => {
             e.stopPropagation();

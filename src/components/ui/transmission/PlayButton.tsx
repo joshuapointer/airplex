@@ -13,6 +13,8 @@ export interface PlayButtonProps {
   className?: string;
   /** If true, plays the audio cue + triggers haptic on press. Default true. */
   feedback?: boolean;
+  /** Disable the button (e.g. while a form action is pending). */
+  disabled?: boolean;
 }
 
 const PlayIcon = () => (
@@ -35,6 +37,7 @@ export function PlayButton({
   'aria-label': ariaLabel,
   className,
   feedback = true,
+  disabled,
 }: PlayButtonProps) {
   const handleClick = () => {
     if (feedback !== false) {
@@ -48,6 +51,7 @@ export function PlayButton({
 
   const classes = ['btn-play', 'btn-machined', 'w-full', 'sm:w-auto'];
   if (className) classes.push(className);
+  if (disabled) classes.push('opacity-60', 'cursor-not-allowed');
 
   return (
     <button
@@ -56,6 +60,7 @@ export function PlayButton({
       onClick={handleClick}
       aria-label={ariaLabel}
       className={classes.join(' ')}
+      disabled={disabled}
     >
       {children ?? (
         <>

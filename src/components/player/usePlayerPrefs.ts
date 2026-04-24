@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const KEY = 'airplex.player.prefs.v1';
+const KEY = 'airpointer.player.prefs.v1';
+const LEGACY_KEY = 'airplex.player.prefs.v1';
 
 export interface PlayerPrefs {
   volume: number;
@@ -26,8 +27,27 @@ function clampRate(n: unknown): number {
   return typeof n === 'number' && Number.isFinite(n) && n >= 0.25 && n <= 4 ? n : 1;
 }
 
+/**
+ * One-time migration from the legacy `airplex.*` key to `airpointer.*`.
+ * Copies then removes the legacy value so subsequent reads go to the new key.
+ */
+function migrateLegacyKey(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const existing = window.localStorage.getItem(KEY);
+    if (existing !== null) return;
+    const legacy = window.localStorage.getItem(LEGACY_KEY);
+    if (legacy === null) return;
+    window.localStorage.setItem(KEY, legacy);
+    window.localStorage.removeItem(LEGACY_KEY);
+  } catch {
+    /* storage unavailable — non-fatal */
+  }
+}
+
 export function loadPlayerPrefs(): PlayerPrefs {
   if (typeof window === 'undefined') return DEFAULT_PREFS;
+  migrateLegacyKey();
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return DEFAULT_PREFS;

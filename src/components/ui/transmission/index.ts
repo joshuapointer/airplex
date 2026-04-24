@@ -32,3 +32,6 @@ export { armCurtainOnSubmit } from './CurtainTransition';
 
 export { ClaimForm } from './ClaimForm';
 export type { ClaimFormProps } from './ClaimForm';
+
+export { ShareHero } from './ShareHero';
+export type { ShareHeroProps } from './ShareHero';

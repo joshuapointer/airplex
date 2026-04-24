@@ -8,6 +8,8 @@ import { LibraryPicker } from './LibraryPicker';
 import { useCsrf } from './CsrfContext';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import { GlassPanel } from '@/components/ui/GlassPanel';
+import { InlineError } from '@/components/ui/InlineError';
+import { Spinner } from '@/components/ui/Spinner';
 import { PosterCard } from '@/components/ui/transmission';
 
 type Step = 'library' | 'item' | 'details' | 'done';
@@ -30,11 +32,7 @@ function StepIndicator({ current }: { current: Step }) {
   return (
     <div className="flex flex-wrap gap-2 mb-6">
       {STEPS.map((s, i) => (
-        <span
-          key={s.key}
-          className="season-tab"
-          aria-selected={i === currentIdx ? 'true' : 'false'}
-        >
+        <span key={s.key} className="chip-tab" aria-selected={i === currentIdx ? 'true' : 'false'}>
           {s.label}
         </span>
       ))}
@@ -217,6 +215,7 @@ export function NewShareForm() {
   }
 
   const heading = 'font-display uppercase tracking-wide text-lg text-np-cyan mb-4';
+  const headingDone = 'font-display uppercase tracking-wide text-lg text-np-green mb-4';
 
   function renderLibrary() {
     return (
@@ -224,14 +223,14 @@ export function NewShareForm() {
         <h2 className={heading}>Step 1 — Pick a Library</h2>
         <div className="max-w-[400px] flex flex-col gap-3">
           <LibraryPicker value={sectionId} onChange={setSectionId} disabled={itemsLoading} />
-          {itemsError && <p className="text-np-magenta font-mono text-sm">{itemsError}</p>}
+          {itemsError && <InlineError>{itemsError}</InlineError>}
           <div>
             <button
               onClick={() => loadItems(sectionId)}
               disabled={!sectionId || itemsLoading}
-              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
-              {itemsLoading ? 'Loading…' : 'Next →'}
+              {itemsLoading ? <Spinner variant="dots" label="Loading" /> : 'Next →'}
             </button>
           </div>
         </div>
@@ -260,10 +259,14 @@ export function NewShareForm() {
           value={itemQuery}
           onChange={(e) => setItemQuery(e.target.value)}
           placeholder="⌕ Search…"
-          className="w-full bg-transparent border border-[rgba(255,255,255,0.12)] rounded-sharp px-3 py-2 text-sm font-mono text-np-fg outline-none focus:border-np-cyan mb-4"
+          className="w-full bg-transparent border border-[rgba(255,255,255,0.12)] rounded-sharp px-3 py-2 text-sm font-mono text-np-fg outline-none focus:border-np-green mb-4"
           aria-label="Search items"
         />
-        {typeaheadLoading && <p className="text-np-muted font-mono text-xs mb-2">Searching…</p>}
+        {typeaheadLoading && (
+          <div className="mb-2">
+            <Spinner variant="dots" label="Searching" />
+          </div>
+        )}
         {displayItems.length === 0 ? (
           <p className="p-4 text-np-muted font-mono text-sm">
             {typeaheadItems !== null ? 'No matches.' : 'No items found in this library.'}
@@ -383,15 +386,19 @@ export function NewShareForm() {
             Never expires
           </label>
 
-          {submitError && <p className="text-np-magenta font-mono text-sm mb-3">{submitError}</p>}
+          {submitError && (
+            <div className="mb-3">
+              <InlineError>{submitError}</InlineError>
+            </div>
+          )}
 
           <div>
             <button
               type="submit"
               disabled={submitting || !recipientLabel.trim()}
-              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
-              {submitting ? 'Creating…' : 'Create Share'}
+              {submitting ? <Spinner variant="dots" label="Creating" /> : 'Create Share'}
             </button>
           </div>
         </form>
@@ -403,9 +410,7 @@ export function NewShareForm() {
     if (!result) return null;
     return (
       <div>
-        <h2 className="font-display uppercase tracking-wide text-lg text-np-green mb-4">
-          Share Created
-        </h2>
+        <h2 className={headingDone}>Share Created</h2>
         <p className="text-np-muted font-mono text-sm mb-4">
           The share link is shown only once. Copy it now.
         </p>

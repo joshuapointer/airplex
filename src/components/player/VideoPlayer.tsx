@@ -802,10 +802,11 @@ export function VideoPlayer({
         <span>+{SKIP_SECONDS}</span>
       </div>
 
-      {/* Center loading spinner */}
+      {/* Center loading spinner — suppress before first play so it doesn't
+          stack on top of the large center play overlay. */}
       <div
         className="vp-spinner"
-        data-active={isBuffering && !fatalError ? 'true' : 'false'}
+        data-active={isBuffering && started && !fatalError ? 'true' : 'false'}
         aria-hidden="true"
       >
         <span className="vp-spinner-dot" style={{ animationDelay: '0ms' }} />
@@ -1178,38 +1179,62 @@ export function VideoPlayer({
             </button>
           ) : null}
 
-          {/* AirPlay */}
-          {showAirplayButton ? (
-            <button type="button" className="vp-btn" onClick={triggerAirplay} aria-label="AirPlay">
-              <AirplayIcon />
-            </button>
-          ) : null}
+          {/* Right-anchored control cluster — AirPlay / info / fullscreen.
+              flex-shrink:0 via .vp-right-group so they never collapse off
+              the bar on narrow widths. */}
+          <div className="vp-right-group">
+            {showAirplayButton ? (
+              <button
+                type="button"
+                className="vp-btn"
+                onClick={triggerAirplay}
+                aria-label="AirPlay"
+              >
+                <AirplayIcon />
+              </button>
+            ) : null}
 
-          {/* Info / side panel toggle */}
-          {onOpenPanel ? (
+            {/* Info / side panel toggle — hidden in landscape because the
+                floating .vp-info-fab covers that surface. Portrait keeps this
+                button since the FAB is display:none there. */}
+            {onOpenPanel ? (
+              <button
+                type="button"
+                className="vp-btn vp-btn-info-inline"
+                onClick={onOpenPanel}
+                aria-label={panelOpen ? 'Close details panel' : 'Open details panel'}
+                aria-pressed={panelOpen}
+              >
+                <InfoIcon />
+              </button>
+            ) : null}
+
             <button
               type="button"
               className="vp-btn"
-              onClick={onOpenPanel}
-              aria-label={panelOpen ? 'Close details panel' : 'Open details panel'}
-              aria-pressed={panelOpen}
+              onClick={toggleFs}
+              aria-label={fsActive ? 'Exit fullscreen' : 'Fullscreen'}
+              aria-pressed={fsActive}
             >
-              <InfoIcon />
+              {fsActive ? <FsExitIcon /> : <FsIcon />}
             </button>
-          ) : null}
-
-          {/* Fullscreen */}
-          <button
-            type="button"
-            className="vp-btn"
-            onClick={toggleFs}
-            aria-label={fsActive ? 'Exit fullscreen' : 'Fullscreen'}
-            aria-pressed={fsActive}
-          >
-            {fsActive ? <FsExitIcon /> : <FsIcon />}
-          </button>
+          </div>
         </div>
       </div>
+
+      {/* iOS AirPlay FAB — persistent when the control bar hides so
+          recipients can always reach AirPlay with one tap. Hidden in
+          portrait via CSS (see .vp-airplay-fab). */}
+      {showAirplayButton && started ? (
+        <button
+          type="button"
+          className="vp-airplay-fab"
+          onClick={triggerAirplay}
+          aria-label="AirPlay"
+        >
+          <AirplayIcon />
+        </button>
+      ) : null}
     </div>
   );
 }

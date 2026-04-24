@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Badge } from '@/components/ui/Badge';
+import { InlineError } from '@/components/ui/InlineError';
 
 interface PlexSetupClientProps {
   csrf: string;
@@ -83,7 +84,9 @@ export function PlexSetupClient({
           <div className="mb-3">
             <Badge status="active">Connected</Badge>
           </div>
-          <div className="text-base mb-1">{serverName ?? 'Plex Media Server'}</div>
+          <div className="font-display uppercase tracking-wide text-np-fg text-base mb-1">
+            {serverName ?? 'Plex Media Server'}
+          </div>
           <div className="text-xs font-mono text-np-muted break-all mb-6">{serverUrl}</div>
         </>
       ) : (
@@ -92,7 +95,11 @@ export function PlexSetupClient({
         </p>
       )}
 
-      {error && <p className="text-np-magenta font-mono text-sm mb-3">{error}</p>}
+      {error && (
+        <div className="mb-3">
+          <InlineError>{error}</InlineError>
+        </div>
+      )}
 
       <button
         type="button"

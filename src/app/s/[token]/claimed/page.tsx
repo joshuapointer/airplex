@@ -20,34 +20,36 @@ export default function ClaimedPage() {
           aria-labelledby="claimed-heading"
         >
           {/* Brand */}
-          <p className="text-np-cyan font-mono text-xs uppercase tracking-widest mb-6">airPointer</p>
+          <p className="text-np-cyan font-mono text-xs uppercase tracking-widest mb-6">
+            airPointer
+          </p>
 
-          {/* Icon mark */}
+          {/* Icon mark — lock glyph reinforces "already claimed" semantics */}
           <div className="mb-5" aria-hidden="true">
             <svg
-              width="36"
-              height="36"
-              viewBox="0 0 36 36"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               className="text-np-cyan"
             >
               <rect
-                x="1"
-                y="1"
-                width="34"
-                height="34"
+                x="3"
+                y="7"
+                width="10"
+                height="7"
                 rx="1"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="1.2"
               />
               <path
-                d="M11 18h14M18 11l7 7-7 7"
+                d="M5.5 7V5a2.5 2.5 0 015 0v2"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="1.2"
                 strokeLinecap="round"
-                strokeLinejoin="round"
               />
+              <circle cx="8" cy="10.5" r="0.75" fill="currentColor" />
             </svg>
           </div>
 
@@ -71,6 +73,12 @@ export default function ClaimedPage() {
             style={{ color: 'var(--np-text-faint)' }}
           >
             Ask the sender to reset the device lock from their dashboard, or to send you a new link.
+          </p>
+          <p
+            className="font-mono text-xs leading-relaxed mt-2"
+            style={{ color: 'var(--np-text-faint)' }}
+          >
+            If you can&rsquo;t reach the sender, this link cannot be unlocked.
           </p>
         </section>
       </div>

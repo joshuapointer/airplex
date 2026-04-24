@@ -28,8 +28,12 @@ export default async function ShareDetailPage({ params }: ShareDetailPageProps) 
         </Link>
       </div>
 
-      <h1 className="font-display uppercase tracking-wide text-2xl text-np-cyan mb-6">
-        Share Detail
+      <span className="font-mono text-xs uppercase tracking-widest text-np-muted">
+        Share detail
+      </span>
+      {/* exception: movie titles preserve case */}
+      <h1 className="font-display text-2xl sm:text-3xl text-np-fg mb-6 leading-tight">
+        {share.title}
       </h1>
 
       <ShareCard share={share} status={status} />

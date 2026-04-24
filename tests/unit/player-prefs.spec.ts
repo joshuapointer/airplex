@@ -22,6 +22,10 @@ class MemStorage {
   }
 }
 
+function getStorage(): MemStorage {
+  return (globalThis as unknown as { window: { localStorage: MemStorage } }).window.localStorage;
+}
+
 describe('player prefs persistence', () => {
   beforeEach(() => {
     const storage = new MemStorage();
@@ -53,18 +57,30 @@ describe('player prefs persistence', () => {
   });
 
   it('recovers from corrupt JSON', () => {
-    (globalThis as unknown as { window: { localStorage: MemStorage } }).window.localStorage.setItem(
-      'airplex.player.prefs.v1',
-      '{not-json',
-    );
+    getStorage().setItem('airpointer.player.prefs.v1', '{not-json');
     expect(loadPlayerPrefs()).toEqual(DEFAULT_PREFS);
   });
 
   it('rejects non-object stored payload', () => {
-    (globalThis as unknown as { window: { localStorage: MemStorage } }).window.localStorage.setItem(
-      'airplex.player.prefs.v1',
-      '"string-not-obj"',
-    );
+    getStorage().setItem('airpointer.player.prefs.v1', '"string-not-obj"');
     expect(loadPlayerPrefs()).toEqual(DEFAULT_PREFS);
+  });
+
+  it('migrates legacy airplex.* key to airpointer.* on first read', () => {
+    const storage = getStorage();
+    storage.setItem(
+      'airplex.player.prefs.v1',
+      JSON.stringify({ volume: 0.2, muted: true, rate: 1.25, captionsLang: 'fr' }),
+    );
+    // New key absent — migration copies the legacy value.
+    expect(loadPlayerPrefs()).toEqual({
+      volume: 0.2,
+      muted: true,
+      rate: 1.25,
+      captionsLang: 'fr',
+    });
+    // Legacy key cleared after migration.
+    expect(storage.getItem('airplex.player.prefs.v1')).toBeNull();
+    expect(storage.getItem('airpointer.player.prefs.v1')).not.toBeNull();
   });
 });

@@ -45,11 +45,22 @@ export function DashboardShell({
     };
   }, [drawerOpen]);
 
+  // Escape closes the drawer (mobile) — keyboard accessibility for the
+  // fullscreen overlay pattern.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [drawerOpen]);
+
   return (
     <div className="relative flex min-h-screen flex-col md:flex-row" style={{ zIndex: 3 }}>
       {/* Mobile topbar (visible <md only) */}
       <header className="md:hidden glass flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.08)] rounded-none sticky top-0 z-20">
-        <div className="font-display uppercase text-lg tracking-[0.08em] text-np-cyan">
+        <div className="font-display uppercase text-xl tracking-[0.08em] text-np-cyan">
           <BrandFlicker>airPointer</BrandFlicker>
         </div>
         <button
@@ -78,10 +89,12 @@ export function DashboardShell({
         </button>
       </header>
 
-      {/* Mobile backdrop */}
+      {/* Mobile backdrop — tabIndex=-1 so keyboard users don't land on it
+          between the menu button and nav items. */}
       {drawerOpen && (
         <button
           type="button"
+          tabIndex={-1}
           aria-label="Close menu"
           onClick={() => setDrawerOpen(false)}
           className="md:hidden fixed inset-0 bg-black/60 z-30"
@@ -100,7 +113,7 @@ export function DashboardShell({
           // md+: static sidebar
           'md:static md:translate-x-0 md:w-[220px] md:z-auto',
         ].join(' ')}
-        aria-hidden={!drawerOpen ? undefined : false}
+        aria-hidden={drawerOpen ? undefined : true}
       >
         <div className="font-display uppercase text-xl tracking-[0.08em] text-np-cyan mb-6 hidden md:block">
           <BrandFlicker>airPointer</BrandFlicker>

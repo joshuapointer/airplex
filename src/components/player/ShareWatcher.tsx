@@ -166,7 +166,7 @@ function EpisodePicker({
           style={{ animation: 'np-breathe 1.2s ease-in-out 400ms infinite' }}
           aria-hidden="true"
         />
-        <span className="font-mono text-sm text-np-muted sr-only">Loading episodes…</span>
+        <span className="font-mono text-xs text-np-muted">Loading episodes…</span>
       </div>
     );
   }
@@ -209,7 +209,7 @@ function EpisodePicker({
               role="tab"
               aria-selected={selected}
               onClick={() => setActiveSeasonKey(s.ratingKey)}
-              className={`season-tab${selected ? ' active' : ''}`}
+              className={`chip-tab${selected ? ' active' : ''}`}
             >
               {s.title}
             </button>
@@ -328,15 +328,20 @@ function Player({
     advancedRef.current = false;
   }, [ratingKey, linkId]);
 
-  // Resume fetch.
+  // Resume fetch — capped at 3s so a slow resume endpoint doesn't stall
+  // initial playback. On timeout / error we fall through to "no offer" and
+  // the player starts from the top.
   useEffect(() => {
     let cancelled = false;
+    const ac = new AbortController();
+    const timeoutId = setTimeout(() => ac.abort(), 3000);
     (async () => {
       try {
         const res = await fetch(
           `/api/hls/${linkId}/resume?ratingKey=${encodeURIComponent(ratingKey)}`,
           {
             cache: 'no-store',
+            signal: ac.signal,
           },
         );
         if (!res.ok) {
@@ -359,6 +364,8 @@ function Player({
     })();
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
+      ac.abort();
     };
   }, [linkId, ratingKey]);
 

@@ -8,6 +8,7 @@ import { useCsrf } from './CsrfContext';
 import { GlassPanel } from '@/components/ui/GlassPanel';
 import { Badge, type BadgeStatus } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { InlineError } from '@/components/ui/InlineError';
 import { AmbientBackdrop } from '@/components/ui/transmission';
 
 interface ShareCardProps {
@@ -84,6 +85,7 @@ export function ShareCard({ share, status }: ShareCardProps) {
         <GlassPanel className="p-6 max-w-[640px]">
           {/* Header */}
           <div className="mb-5">
+            {/* exception: movie titles preserve case */}
             <h2 className="font-display text-xl text-np-fg mb-1">{share.title}</h2>
             <Badge status={badgeStatus}>{statusLabel}</Badge>
           </div>
@@ -127,18 +129,18 @@ export function ShareCard({ share, status }: ShareCardProps) {
           </dl>
 
           {/* Actions */}
-          {error && <p className="text-np-magenta font-mono text-sm mb-3">{error}</p>}
+          {error && (
+            <div className="mb-3">
+              <InlineError>{error}</InlineError>
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-3 items-end">
             {!status.revoked && (
               <button
                 onClick={() => patch({ action: 'revoke' })}
                 disabled={loading !== null}
-                className="btn-ghost text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  color: 'var(--np-magenta)',
-                  borderColor: 'var(--np-magenta)',
-                }}
+                className="btn-danger text-xs disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading === 'revoke' ? 'Revoking…' : 'Revoke'}
               </button>
@@ -148,11 +150,7 @@ export function ShareCard({ share, status }: ShareCardProps) {
               <button
                 onClick={() => patch({ action: 'reset_device' })}
                 disabled={loading !== null}
-                className="btn-ghost text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  color: 'var(--np-cyan)',
-                  borderColor: 'var(--np-cyan)',
-                }}
+                className="btn-cyan text-xs disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading === 'reset_device' ? 'Resetting…' : 'Reset Device'}
               </button>

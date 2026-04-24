@@ -48,14 +48,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         </header>
 
-        <a
-          href={loginHref}
-          className="btn-primary w-full"
-          style={{
-            background: 'var(--np-cyan)',
-            borderColor: 'var(--np-cyan)',
-          }}
-        >
+        <a href={loginHref} className="btn-primary w-full">
           Sign in with SSO
         </a>
       </div>

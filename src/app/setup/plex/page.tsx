@@ -30,6 +30,9 @@ export default async function PlexSetupPage({ searchParams }: SetupPageProps) {
         <h1 className="font-display uppercase tracking-[0.08em] text-2xl text-np-cyan mb-1">
           airPointer setup
         </h1>
+        <p className="text-xs font-mono uppercase tracking-widest text-np-muted -mt-1 mb-3">
+          built by joshPointer
+        </p>
         <p className="text-sm text-np-muted font-mono mb-6">
           Connect your Plex account to begin sharing.
         </p>

@@ -20,15 +20,12 @@ export function Hero() {
         built by joshPointer
       </p>
 
-      {/* Tagline */}
-      <p
-        className="text-base sm:text-lg font-mono text-center max-w-xl mb-10"
-        style={{ color: 'var(--np-muted)' }}
-      >
+      {/* Tagline — brighter than the muted byline so the two read as distinct */}
+      <p className="text-base sm:text-lg font-mono text-center max-w-xl mb-10 text-np-fg/80">
         Share a Plex stream. Hit play. AirPlay to anything.
       </p>
 
-      {/* CTA */}
+      {/* CTA — default green btn-primary (primary-action convention) */}
       <Link
         href="/login"
         className="btn-primary px-8 py-3 text-sm tracking-widest"

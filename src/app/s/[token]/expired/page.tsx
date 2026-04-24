@@ -18,7 +18,7 @@ const REASON_COPY: Record<
     headline: 'Link expired',
     body: 'This share link has passed its expiry window and can no longer be used.',
     hint: 'Ask the sender to create a new link for you.',
-    accentColor: 'var(--np-magenta)',
+    accentColor: 'var(--np-cyan)',
   },
   revoked: {
     headline: 'Link revoked',
@@ -28,9 +28,9 @@ const REASON_COPY: Record<
   },
   exhausted: {
     headline: 'Play limit reached',
-    body: 'This link has reached its configured play limit.',
+    body: 'This link has been used the maximum number of times.',
     hint: 'Ask the sender to reset the limit or issue a new link.',
-    accentColor: 'var(--np-magenta)',
+    accentColor: 'var(--np-muted)',
   },
 };
 
@@ -59,11 +59,8 @@ export default async function ExpiredPage({
           role="main"
           aria-labelledby="expired-heading"
         >
-          {/* Brand */}
-          <p
-            className="font-mono text-xs uppercase tracking-widest mb-6"
-            style={{ color: copy.accentColor }}
-          >
+          {/* Brand — always cyan (brand wordmark, not per-reason accent) */}
+          <p className="text-np-cyan font-mono text-xs uppercase tracking-widest mb-6">
             airPointer
           </p>
 

@@ -58,6 +58,17 @@ export function PlayerSidePanel({
   onSelectEpisode,
 }: PlayerSidePanelProps) {
   const [tab, setTab] = useState<TabKey>('metadata');
+  // In portrait the panel is always inline-visible below the player, so AT
+  // must see it regardless of the `open` drawer prop.
+  const [isPortrait, setIsPortrait] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(orientation: portrait)');
+    const sync = () => setIsPortrait(mql.matches);
+    sync();
+    mql.addEventListener?.('change', sync);
+    return () => mql.removeEventListener?.('change', sync);
+  }, []);
   const [meta, setMeta] = useState<PlayerMetadata | null>(null);
   const [metaLoading, setMetaLoading] = useState(false);
   const [metaError, setMetaError] = useState<string | null>(null);
@@ -67,6 +78,7 @@ export function PlayerSidePanel({
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const metadataTabRef = useRef<HTMLButtonElement>(null);
   const queueTabRef = useRef<HTMLButtonElement>(null);
+  const asideRef = useRef<HTMLElement>(null);
   // Element that was focused immediately before the panel opened; restored
   // on close so keyboard users return to the info button / control bar.
   const prevFocusRef = useRef<HTMLElement | null>(null);
@@ -119,6 +131,34 @@ export function PlayerSidePanel({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
+  // Focus trap — only when we're rendered as a drawer (landscape) with the
+  // panel open. Portrait mode is an inline section, so normal document
+  // tab order applies.
+  useEffect(() => {
+    if (!open || isPortrait) return;
+    const aside = asideRef.current;
+    if (!aside) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const focusables = aside.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    aside.addEventListener('keydown', onKey);
+    return () => aside.removeEventListener('keydown', onKey);
+  }, [open, isPortrait]);
+
   // Focus management: move focus into the panel on open (close button — the
   // least-destructive anchor), restore prior focus on close. Skip the first
   // mount so the page's own focus order isn't clobbered.
@@ -158,17 +198,30 @@ export function PlayerSidePanel({
 
   return (
     <>
-      {/* Backdrop scrim — only visible on mobile where the panel is a full overlay */}
+      {/* Backdrop scrim — only visible on mobile landscape where the panel
+          is a full overlay. Keyboard-reachable close affordance. */}
       <div
         className="player-panel-scrim"
         data-open={open ? 'true' : 'false'}
-        aria-hidden="true"
+        role="button"
+        aria-label="Close panel"
+        tabIndex={open ? 0 : -1}
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClose();
+          }
+        }}
       />
       <aside
+        ref={asideRef}
         className="player-side-panel"
         data-open={open ? 'true' : 'false'}
-        aria-hidden={!open}
+        /* Panel is always inline-visible in portrait — expose it to AT in
+           that mode regardless of the `open` drawer prop. Landscape uses
+           the drawer state. */
+        aria-hidden={isPortrait || open ? undefined : true}
         role="complementary"
         aria-label="Details and queue"
       >

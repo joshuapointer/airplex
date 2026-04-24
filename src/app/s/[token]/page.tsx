@@ -3,13 +3,7 @@ import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 
 import { ClaimedShareView } from '@/components/player/ClaimedShareView';
-import {
-  AmbientBackdrop,
-  ClaimForm,
-  FrameBrackets,
-  PosterCard,
-  TypewriterTitle,
-} from '@/components/ui/transmission';
+import { ClaimForm, ShareHero } from '@/components/ui/transmission';
 import { logEvent } from '@/db/queries/events';
 import { listResumePositions } from '@/db/queries/resume';
 import {
@@ -177,7 +171,9 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   }
 
   const posterSrc = row.poster_path ? `/api/share/${token}/poster` : null;
-  const ttlLabel = row.expires_at === null ? 'no expiry' : formatTtlLong(ttlSeconds);
+  const ttlLabel = row.expires_at === null ? 'never expires' : formatTtlLong(ttlSeconds);
+  const ttlAccent: 'default' | 'warn' =
+    row.expires_at !== null && ttlSeconds < 86_400 ? 'warn' : 'default';
 
   if (holdsLock) {
     const hasResume = hasResumablePosition(row.id);
@@ -190,6 +186,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
         senderLabel={row.sender_label}
         recipientLabel={row.recipient_label}
         ttlLabel={ttlLabel}
+        ttlAccent={ttlAccent}
         posterSrc={posterSrc}
         hasResume={hasResume}
       />
@@ -203,79 +200,36 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
 
   return (
     <main className="min-h-screen bg-np-bg text-np-fg safe-top safe-bottom safe-x relative overflow-hidden">
-      <AmbientBackdrop posterUrl={posterSrc} kenBurns loading="eager" />
-      {/* Content column — relative, z-index 3 (on top of backdrop + frame-scan + brackets) */}
-      <div
-        className="relative flex flex-col min-h-screen max-w-lg mx-auto w-full px-4 sm:px-6 py-8"
-        style={{ zIndex: 3 }}
-      >
-        {/* Brand header */}
-        <header className="mb-6 flex items-center justify-between animate-enter">
-          <p className="text-np-green font-mono text-xs uppercase tracking-widest">airPointer</p>
-          <span className="badge">share</span>
-        </header>
-
-        {/* Wrapper that hosts the frame brackets + scan overlay around the hero block */}
-        <div className="relative flex-1 flex flex-col items-center justify-center">
-          {/* Frame brackets wrap the inner card */}
-          <div className="relative w-full max-w-sm">
-            <FrameBrackets />
-            <div className="frame-scan" aria-hidden="true" />
-            <div className="relative flex flex-col items-center gap-5 p-6" style={{ zIndex: 3 }}>
-              {/* Poster — hero */}
-              <PosterCard
-                posterUrl={posterSrc}
-                title={row.title}
-                aspect="3/4"
-                loading="eager"
-                width={240}
-                height={360}
-                className="w-full max-w-[240px] animate-enter-delay-1"
-              />
-
-              {/* Sender line */}
-              {row.sender_label ? (
-                <p className="text-np-cyan font-mono text-xs uppercase tracking-widest animate-enter-delay-1">
-                  From <span className="text-np-fg">{row.sender_label}</span>
-                </p>
-              ) : null}
-
-              {/* Title */}
-              <TypewriterTitle
-                text={row.title}
-                maxChars={40}
-                as="h1"
-                className="font-display text-3xl sm:text-4xl uppercase tracking-wide text-np-fg leading-tight text-center animate-enter-delay-2"
-              />
-
-              {/* CTA */}
-              <ClaimForm
-                action={boundClaim}
-                ariaLabel={`Start streaming ${row.title}`}
-                className="w-full animate-enter-delay-3"
-              >
-                <svg
-                  aria-hidden="true"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M3 2.5L13 8L3 13.5V2.5Z" />
-                </svg>
-                Start streaming
-              </ClaimForm>
-            </div>
-          </div>
-
-          {/* Footnote — below the bracketed card */}
-          <p className="mt-5 text-np-muted font-mono text-xs text-center animate-enter-delay-3">
-            for <span className="text-np-cyan">{row.recipient_label}</span> ·{' '}
-            <span className="text-np-fg">{ttlLabel}</span> · locks to device
-          </p>
-        </div>
-      </div>
+      <ShareHero
+        title={row.title}
+        mediaType={row.plex_media_type}
+        rootRatingKey={row.plex_rating_key}
+        senderLabel={row.sender_label}
+        recipientLabel={row.recipient_label}
+        ttlLabel={ttlLabel}
+        ttlAccent={ttlAccent}
+        ttlHint="locks to device"
+        posterSrc={posterSrc}
+        cta={
+          <ClaimForm
+            action={boundClaim}
+            ariaLabel={`Start streaming ${row.title}`}
+            className="w-full animate-enter-delay-3"
+          >
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M3 2.5L13 8L3 13.5V2.5Z" />
+            </svg>
+            Start streaming
+          </ClaimForm>
+        }
+      />
     </main>
   );
 }
