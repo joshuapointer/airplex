@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/auth/guards';
 import { verifyCsrf } from '@/lib/csrf';
 import { env } from '@/lib/env';
+import { extractClientIp } from '@/lib/ip';
 import {
   getShareById,
   revokeShare,
@@ -13,19 +14,6 @@ import {
 } from '@/db/queries/shares';
 import { logEvent, listEventsByShare } from '@/db/queries/events';
 import type { ShareRow } from '@/types/share';
-
-/**
- * IP extraction parity with C1/middleware: only honor `x-forwarded-for`
- * when `env.TRUST_PROXY` is set; otherwise fall back to `'unknown'`.
- */
-function extractClientIp(req: NextRequest): string {
-  if (env.TRUST_PROXY) {
-    const xff = req.headers.get('x-forwarded-for');
-    const first = xff?.split(',')[0]?.trim();
-    if (first && first.length > 0) return first;
-  }
-  return 'unknown';
-}
 
 function stripTokenHash(row: ShareRow): Omit<ShareRow, 'token_hash'> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
