@@ -13,6 +13,8 @@
    */
   --np-fg: var(--np-text);
   --np-muted: var(--np-text-muted);
+  --np-green-subtle: rgba(0, 255, 153, 0.08);
+  --np-text-faint: rgba(255, 255, 255, 0.35);
   --np-font-display: 'Antonio', sans-serif;
   --np-font-body: 'JetBrains Mono', monospace;
   --np-radius-sharp: 2px;

@@ -35,6 +35,8 @@ airplex_oidc_client_id: ''
 airplex_oidc_client_secret: ''
 airplex_oidc_admin_groups: ''
 airplex_oidc_groups_claim: 'groups'
+airplex_oidc_redirect_uri: ''
+airplex_tmdb_api_key: ''
 airplex_share_default_ttl_hours: 48
 airplex_share_max_ttl_hours: 168
 airplex_log_level: 'info'

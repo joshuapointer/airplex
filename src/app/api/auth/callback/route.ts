@@ -59,6 +59,13 @@ export async function GET(req: NextRequest) {
   admin.csrf = adminData.csrf;
   await admin.save();
 
-  const target = state.returnTo ?? '/dashboard';
+  // Defense-in-depth: re-validate returnTo even though it was validated at
+  // login time. Must start with '/' and must not start with '//' (which would
+  // be treated as a protocol-relative URL by some parsers).
+  const rawTarget = state.returnTo;
+  const target =
+    typeof rawTarget === 'string' && rawTarget.startsWith('/') && !rawTarget.startsWith('//')
+      ? rawTarget
+      : '/dashboard';
   return NextResponse.redirect(new URL(target, env.APP_URL));
 }

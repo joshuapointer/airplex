@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { env } from '@/lib/env';
@@ -74,7 +75,12 @@ export async function requireShareAccess(req: Request, linkId: string): Promise<
       acceptLang = h.get('accept-language') ?? '';
     }
     const fp = computeDeviceFp(ua, acceptLang);
-    if (fp !== row.device_fingerprint_hash) {
+    if (
+      !crypto.timingSafeEqual(
+        Buffer.from(fp, 'hex'),
+        Buffer.from(row.device_fingerprint_hash, 'hex'),
+      )
+    ) {
       throw NextResponse.json({ error: 'forbidden' }, { status: 403 });
     }
   }

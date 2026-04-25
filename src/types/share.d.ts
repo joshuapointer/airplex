@@ -31,7 +31,8 @@ export type ShareEventKind =
   | 'rejected_device'
   | 'expired'
   | 'revoked'
-  | 'reset';
+  | 'reset'
+  | 'extended';
 
 export interface ShareEventRow {
   id: number;

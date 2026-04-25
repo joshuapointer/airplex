@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import type Database from 'better-sqlite3';
 import { getDb } from '../client';
-import type { ShareEventKind } from '@/types/share';
+import type { ShareEventKind, ShareEventRow } from '@/types/share';
 import type { EventTailRow } from '@/types/transmission';
 
 // ---------- daily IP salt (in-memory, rotates per UTC day) ----------
@@ -168,4 +168,24 @@ export function listRecentEventsWithShare(limit: number = 5): EventTailRow[] {
     recipient_label: r.recipient_label,
     short_detail: buildShortDetail(r.kind, r.detail),
   }));
+}
+
+// ---------- per-share event history ----------
+
+let _eventsByShareStmt: Database.Statement<[string, number]> | null = null;
+
+function eventsByShareStmt() {
+  if (_eventsByShareStmt) return _eventsByShareStmt;
+  _eventsByShareStmt = getDb().prepare<[string, number]>(
+    'SELECT id, share_id, at, kind, ip_hash, ua_hash, detail\n' +
+      'FROM share_events\n' +
+      'WHERE share_id = ?\n' +
+      'ORDER BY at DESC\n' +
+      'LIMIT ?',
+  );
+  return _eventsByShareStmt;
+}
+
+export function listEventsByShare(shareId: string, limit: number = 50): ShareEventRow[] {
+  return eventsByShareStmt().all(shareId, limit) as ShareEventRow[];
 }

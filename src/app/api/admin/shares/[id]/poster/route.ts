@@ -54,9 +54,13 @@ export async function GET(
     return notFound();
   }
 
-  const upstreamType = upstream.headers.get('content-type') ?? 'image/jpeg';
+  const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+  const rawType = upstream.headers.get('content-type') ?? '';
+  const bareType = rawType.split(';')[0].trim().toLowerCase();
+  const contentType = ALLOWED_IMAGE_TYPES.has(bareType) ? bareType : 'image/jpeg';
+
   const headers: Record<string, string> = {
-    'Content-Type': upstreamType,
+    'Content-Type': contentType,
     'Cache-Control': 'private, max-age=3600',
     'Referrer-Policy': 'no-referrer',
   };

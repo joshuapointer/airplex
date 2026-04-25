@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireAdmin } from '@/auth/guards';
 import { verifyCsrf } from '@/lib/csrf';
 import { env } from '@/lib/env';
+import { extractClientIp } from '@/lib/ip';
 import { createShareToken } from '@/lib/share-token';
 import { insertShare, listShares } from '@/db/queries/shares';
 import { logEvent } from '@/db/queries/events';

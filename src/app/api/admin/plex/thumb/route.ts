@@ -58,9 +58,16 @@ export async function GET(request: Request): Promise<NextResponse | Response> {
     return NextResponse.json({ error: 'not_found' }, { status: 404 });
   }
 
-  const upstreamType = upstream.headers.get('content-type') ?? 'image/jpeg';
+  // Content-Type allowlist: only forward known-safe image types so a
+  // misconfigured Plex server can't make the browser interpret arbitrary
+  // bytes (e.g. an HTML error page) as an image.
+  const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+  const rawType = upstream.headers.get('content-type') ?? '';
+  const bareType = rawType.split(';')[0].trim().toLowerCase();
+  const contentType = ALLOWED_IMAGE_TYPES.has(bareType) ? bareType : 'image/jpeg';
+
   const headers: Record<string, string> = {
-    'Content-Type': upstreamType,
+    'Content-Type': contentType,
     'Cache-Control': 'private, max-age=300',
     'Referrer-Policy': 'no-referrer',
   };

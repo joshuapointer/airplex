@@ -5,3 +5,13 @@
     state: present
     pull: always
   notify: restart airplex
+
+- name: Wait for airplex to become healthy
+  uri:
+    url: 'http://localhost:{{ airplex_public_port }}/api/health'
+    method: GET
+    status_code: 200
+  register: health_result
+  until: health_result.status == 200
+  retries: 12
+  delay: 5

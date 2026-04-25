@@ -13,6 +13,21 @@ interface Bucket {
 
 const buckets = new Map<string, Bucket>();
 
+/** Buckets idle for longer than this are eligible for eviction. */
+const EVICT_AFTER_MS = 10 * 60 * 1000; // 10 minutes
+
+/** Run a sweep every N calls to avoid O(n) cost on every request. */
+const SWEEP_INTERVAL = 500;
+let callCount = 0;
+
+function sweepStaleBuckets(now: number): void {
+  for (const [k, b] of buckets) {
+    if (now - b.lastRefillMs > EVICT_AFTER_MS) {
+      buckets.delete(k);
+    }
+  }
+}
+
 /**
  * Deduct one token from the bucket keyed by `key`. Returns true if a token
  * was available (and the caller may proceed), false if the caller is throttled.
@@ -23,6 +38,15 @@ const buckets = new Map<string, Bucket>();
  */
 export function rateLimit(key: string, capacity: number, refillPerSec: number): boolean {
   const now = Date.now();
+
+  // Periodic sweep to evict buckets that have been idle for more than
+  // EVICT_AFTER_MS. Running every SWEEP_INTERVAL calls keeps the Map bounded
+  // without paying O(n) on every single request.
+  callCount += 1;
+  if (callCount % SWEEP_INTERVAL === 0) {
+    sweepStaleBuckets(now);
+  }
+
   const existing = buckets.get(key);
   let bucket: Bucket;
   if (existing === undefined) {

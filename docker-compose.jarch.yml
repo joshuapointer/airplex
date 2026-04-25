@@ -2,7 +2,8 @@ services:
   airplex:
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.airplex.rule=Host(`${APP_URL#https://}`)'
+      # DOMAIN must be set in the environment (e.g. DOMAIN=airplex.example.com) — Docker Compose does not support bash parameter expansion like ${APP_URL#https://}
+      - 'traefik.http.routers.airplex.rule=Host(`${DOMAIN}`)'
       - 'traefik.http.routers.airplex.entrypoints=websecure'
       - 'traefik.http.routers.airplex.tls.certresolver=letsencrypt'
       - 'traefik.http.services.airplex.loadbalancer.server.port=3000'

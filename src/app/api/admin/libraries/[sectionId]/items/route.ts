@@ -14,9 +14,23 @@ export async function GET(
   }
 
   const { sectionId } = await params;
+  if (!/^\d+$/.test(sectionId)) {
+    return NextResponse.json({ error: 'invalid_section_id' }, { status: 400 });
+  }
+
   const { searchParams } = req.nextUrl;
-  const start = Number(searchParams.get('start') ?? '0');
-  const size = Number(searchParams.get('size') ?? '50');
+
+  const rawStart = Number(searchParams.get('start') ?? '0');
+  if (!Number.isInteger(rawStart) || rawStart < 0 || rawStart > 10000) {
+    return NextResponse.json({ error: 'invalid_start' }, { status: 400 });
+  }
+  const start = rawStart;
+
+  const rawSize = Number(searchParams.get('size') ?? '50');
+  if (!Number.isInteger(rawSize) || rawSize < 1 || rawSize > 200) {
+    return NextResponse.json({ error: 'invalid_size' }, { status: 400 });
+  }
+  const size = rawSize;
 
   return NextResponse.json(await listItems(sectionId, start, size));
 }

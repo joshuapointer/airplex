@@ -13,5 +13,8 @@ export async function GET(
     throw err;
   }
   const { ratingKey } = await params;
+  if (!/^\d+$/.test(ratingKey)) {
+    return NextResponse.json({ error: 'invalid_rating_key' }, { status: 400 });
+  }
   return NextResponse.json(await getChildren(ratingKey));
 }

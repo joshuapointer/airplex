@@ -21,7 +21,12 @@ const config = [
           message:
             'Do not pass template literals to better-sqlite3 .exec()/.prepare(). Use prepared statements with bound parameters to prevent SQL injection.',
         },
+        {
+          selector: "MemberExpression[object.name='process'][property.name='env']",
+          message: "Read env vars from '@/lib/env' not process.env directly",
+        },
       ],
+      'no-console': 'error',
     },
   },
   {

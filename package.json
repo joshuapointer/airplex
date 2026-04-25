@@ -12,7 +12,11 @@
     "lint": "next lint && prettier --check .",
     "test:unit": "vitest run tests/unit",
     "test:integration": "playwright test",
-    "gen-secrets": "tsx scripts/gen-secrets.ts"
+    "test:coverage": "vitest run --coverage tests/unit/",
+    "gen-secrets": "tsx scripts/gen-secrets.ts",
+    "db:migrate": "node scripts/migrate-runtime.cjs",
+    "smoke": "tsx scripts/smoke.ts",
+    "lint:fix": "next lint --fix && prettier --write ."
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",

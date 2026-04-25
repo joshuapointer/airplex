@@ -10,6 +10,7 @@ const selectBody = z.object({
   serverUrl: z
     .string()
     .url('serverUrl must be a valid URL')
+    .refine((v) => /^https?:\/\//.test(v), { message: 'Server URL must use http or https' })
     .transform((v) => v.replace(/\/$/, '')),
   serverName: z.string().min(1).max(200),
 });

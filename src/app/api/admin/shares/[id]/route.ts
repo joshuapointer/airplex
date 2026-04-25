@@ -8,9 +8,10 @@ import {
   revokeShare,
   resetDevice,
   extendShare,
+  deleteShare,
   computeShareStatus,
 } from '@/db/queries/shares';
-import { logEvent } from '@/db/queries/events';
+import { logEvent, listEventsByShare } from '@/db/queries/events';
 import type { ShareRow } from '@/types/share';
 
 /**
@@ -64,11 +65,7 @@ export async function GET(
   }
 
   const status = computeShareStatus(row);
-
-  // TODO(v1.1): fetch events via a new query. B1 does not export a
-  // list-events-by-share query, and adding a raw prepared statement here
-  // would violate plan §F (no DB access outside `src/db/queries/*`).
-  const events: never[] = [];
+  const events = listEventsByShare(id);
 
   return NextResponse.json({
     share: stripTokenHash(row),
@@ -130,18 +127,15 @@ export async function PATCH(
   }
 
   // extend
-  // DEVIATION (see route report): `ShareEventKind` has no `'extended'`
-  // variant. Per task instructions, reuse `'reset'` with a detail payload
-  // rather than modifying B1's type. Flagged as an open question.
   const now = Math.floor(Date.now() / 1000);
   const newExpiresAt = body.ttl_hours === null ? null : now + body.ttl_hours * 3600;
   extendShare(id, newExpiresAt);
   logEvent({
     share_id: id,
-    kind: 'reset',
+    kind: 'extended',
     ip,
     userAgent,
-    detail: { action: 'extended', ttl_hours: body.ttl_hours, new_expires_at: newExpiresAt },
+    detail: { ttl_hours: body.ttl_hours, new_expires_at: newExpiresAt },
   });
   return NextResponse.json({ ok: true, expires_at: newExpiresAt });
 }
@@ -162,12 +156,12 @@ export async function DELETE(
     return NextResponse.json({ error: 'csrf' }, { status: 403 });
   }
 
-  void params;
-  // TODO(v1.1): implement hard-delete once B1 exports a `deleteShare`
-  // query. Adding raw DB access here would violate plan §F ("no DB
-  // access outside src/db/queries/*"). Returning 501 for now.
-  return NextResponse.json(
-    { error: 'not_implemented', detail: 'DELETE deferred to v1.1' },
-    { status: 501 },
-  );
+  const { id } = await params;
+  const row = getShareById(id);
+  if (!row) {
+    return NextResponse.json({ error: 'not_found' }, { status: 404 });
+  }
+
+  deleteShare(id);
+  return new NextResponse(null, { status: 204 });
 }

@@ -25,13 +25,23 @@ export function Hero() {
         Share a Plex stream. Hit play. AirPlay to anything.
       </p>
 
-      {/* CTA — default green btn-primary (primary-action convention) */}
+      {/* SSO sign-in CTA — prominent entry point for authenticated users */}
+      <a
+        href="/api/auth/login"
+        className="btn-primary px-8 py-3 text-sm tracking-widest"
+        aria-label="Sign in with SSO"
+      >
+        Sign in with SSO
+      </a>
+
+      {/* Admin login fallback — smaller, de-emphasized */}
       <Link
         href="/login"
-        className="btn-primary px-8 py-3 text-sm tracking-widest"
-        aria-label="Admin login"
+        className="mt-3 font-mono text-xs uppercase tracking-widest"
+        style={{ color: 'var(--np-text-faint)' }}
+        aria-label="Admin login page"
       >
-        Admin Login
+        Admin login →
       </Link>
 
       {/* How it works */}

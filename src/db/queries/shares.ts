@@ -35,6 +35,7 @@ let _stmts: {
   extendShare: Database.Statement<[number | null, string]>;
   incrementPlayCount: Database.Statement<[string]>;
   pickAmbientActive: Database.Statement<[number], ShareRow>;
+  deleteShare: Database.Statement<[string]>;
 } | null = null;
 
 function stmts() {
@@ -73,6 +74,7 @@ function stmts() {
         '    AND poster_path IS NOT NULL\n' +
         '  ORDER BY (expires_at IS NULL), expires_at ASC LIMIT 1',
     ),
+    deleteShare: db.prepare('DELETE FROM shares WHERE id = ?'),
   };
   return _stmts;
 }
@@ -167,6 +169,10 @@ export function incrementPlayCount(id: string): void {
 export function pickAmbientShare(now?: number): ShareRow | null {
   const t = now ?? Math.floor(Date.now() / 1000);
   return (stmts().pickAmbientActive.get(t) as ShareRow | undefined) ?? null;
+}
+
+export function deleteShare(id: string): void {
+  stmts().deleteShare.run(id);
 }
 
 /**
