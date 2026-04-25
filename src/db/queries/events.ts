@@ -48,6 +48,17 @@ function insertStmt() {
   return _insertStmt;
 }
 
+/**
+ * Test-only: reset all prepared-statement caches when the db singleton is
+ * replaced (e.g. between unit tests using an in-memory db).
+ */
+export function __resetEventsStmtsForTests(): void {
+  _insertStmt = null;
+  _recentPlayStmt = null;
+  _recentEventsStmt = null;
+  _eventsByShareStmt = null;
+}
+
 // ---------- public API ----------
 
 export interface LogEventArgs {

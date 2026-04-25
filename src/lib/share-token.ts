@@ -45,7 +45,7 @@ export function verifyShareTokenSignature(token: string): boolean {
     if (typeof token !== 'string') return false;
     const parts = token.split('.');
     if (parts.length !== 2) return false;
-    const [randB64, sigB64] = parts;
+    const [randB64, sigB64] = parts as [string, string];
     const rand = Buffer.from(randB64, 'base64url');
     const sig = Buffer.from(sigB64, 'base64url');
     if (rand.length !== RAND_BYTES) return false;

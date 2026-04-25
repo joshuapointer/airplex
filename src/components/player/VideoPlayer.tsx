@@ -280,7 +280,7 @@ export function VideoPlayer({
     const syncTracks = () => {
       const out: TrackInfo[] = [];
       for (let i = 0; i < v.textTracks.length; i++) {
-        const t = v.textTracks[i];
+        const t = v.textTracks[i]!;
         if (t.kind !== 'subtitles' && t.kind !== 'captions') continue;
         out.push({
           id: String(i),
@@ -308,7 +308,7 @@ export function VideoPlayer({
     if (!v || tracks.length === 0) return;
     const lang = prefs.captionsLang;
     for (let i = 0; i < v.textTracks.length; i++) {
-      const t = v.textTracks[i];
+      const t = v.textTracks[i]!;
       if (t.kind !== 'subtitles' && t.kind !== 'captions') continue;
       t.mode = lang && (t.language === lang || t.label === lang) ? 'showing' : 'disabled';
     }
@@ -592,7 +592,7 @@ export function VideoPlayer({
         case 'C': {
           e.preventDefault();
           if (tracks.length > 0) {
-            const next = prefs.captionsLang ? null : (tracks[0].lang ?? tracks[0].label ?? null);
+            const next = prefs.captionsLang ? null : (tracks[0]!.lang ?? tracks[0]!.label ?? null);
             selectCaptions(next);
           }
           break;

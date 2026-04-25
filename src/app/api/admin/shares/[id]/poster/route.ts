@@ -56,7 +56,7 @@ export async function GET(
 
   const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
   const rawType = upstream.headers.get('content-type') ?? '';
-  const bareType = rawType.split(';')[0].trim().toLowerCase();
+  const bareType = (rawType.split(';')[0] ?? '').trim().toLowerCase();
   const contentType = ALLOWED_IMAGE_TYPES.has(bareType) ? bareType : 'image/jpeg';
 
   const headers: Record<string, string> = {

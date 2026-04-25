@@ -41,7 +41,7 @@ export function ShareRowCursorProvider({
     [ids],
   );
 
-  const focusedId = index >= 0 && index < ids.length ? ids[index] : null;
+  const focusedId = index >= 0 && index < ids.length ? (ids[index] ?? null) : null;
 
   const value = useMemo<RowCursorState>(
     () => ({ focusedId, setFocused, index, setIndex, ids }),

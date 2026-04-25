@@ -223,7 +223,9 @@ export async function findTv(title: string, year?: number | null): Promise<TmdbM
       })) ?? [];
 
   const runtimeMs =
-    d.episode_run_time && d.episode_run_time.length > 0 ? d.episode_run_time[0] * 60_000 : null;
+    d.episode_run_time && d.episode_run_time.length > 0
+      ? d.episode_run_time[0]! * 60_000
+      : null;
 
   return {
     tmdbId: d.id,

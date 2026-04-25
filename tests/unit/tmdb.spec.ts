@@ -95,7 +95,7 @@ describe('tmdb helpers', () => {
       expect(m!.runtimeMs).toBe(117 * 60_000);
       expect(m!.directors).toEqual(['Ridley Scott']);
       expect(m!.writers).toContain('Hampton Fancher');
-      expect(m!.cast[0].name).toBe('Harrison Ford');
+      expect(m!.cast[0]!.name).toBe('Harrison Ford');
       expect(m!.posterUrl).toMatch(/\/p\.jpg$/);
       expect(m!.imdbId).toBe('tt0083658');
     });

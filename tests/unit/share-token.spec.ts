@@ -26,26 +26,26 @@ describe('share-token', () => {
   it('tamper: flipping a char in the rand part fails verification', () => {
     const { token } = createShareToken();
     const parts = token.split('.');
-    const rand = parts[0];
+    const rand = parts[0]!;
     // Replace middle char with a different base64url char to reliably change decoded bytes
     const idx = 10;
-    const original = rand[idx];
+    const original = rand[idx]!;
     const replacement = original === 'A' ? 'B' : 'A';
     const tamperedRand = rand.slice(0, idx) + replacement + rand.slice(idx + 1);
-    const tampered = `${tamperedRand}.${parts[1]}`;
+    const tampered = `${tamperedRand}.${parts[1]!}`;
     expect(verifyShareTokenSignature(tampered)).toBe(false);
   });
 
   it('tamper: flipping a char in the sig part fails verification', () => {
     const { token } = createShareToken();
     const parts = token.split('.');
-    const sig = parts[1];
+    const sig = parts[1]!;
     // Replace middle char with a different base64url char to reliably change decoded bytes
     const idx = 10;
-    const original = sig[idx];
+    const original = sig[idx]!;
     const replacement = original === 'A' ? 'B' : 'A';
     const tamperedSig = sig.slice(0, idx) + replacement + sig.slice(idx + 1);
-    const tampered = `${parts[0]}.${tamperedSig}`;
+    const tampered = `${parts[0]!}.${tamperedSig}`;
     expect(verifyShareTokenSignature(tampered)).toBe(false);
   });
 

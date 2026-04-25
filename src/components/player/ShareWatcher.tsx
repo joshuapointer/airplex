@@ -311,7 +311,7 @@ function Player({
     const all: Episode[] = episodesData.seasons.flatMap((s) => s.episodes);
     const idx = all.findIndex((e) => e.ratingKey === ratingKey);
     if (idx === -1 || idx === all.length - 1) return null;
-    return all[idx + 1];
+    return all[idx + 1] ?? null;
   }, [isShowEpisode, episodesData, ratingKey]);
 
   // Reset state on source change.

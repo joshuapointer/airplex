@@ -77,8 +77,8 @@ describe('buildPlayerMetadata', () => {
     const dto = buildPlayerMetadata({ linkId: LINK_ID, plex: plexFixture(), tmdb: null });
     expect(dto.posterUrl).toMatch(new RegExp(`^/api/hls/${LINK_ID}/img/`));
     expect(dto.backdropUrl).toMatch(new RegExp(`^/api/hls/${LINK_ID}/img/`));
-    expect(dto.cast[0].thumbUrl).toMatch(new RegExp(`^/api/hls/${LINK_ID}/img/`));
-    expect(dto.cast[1].thumbUrl).toBeNull();
+    expect(dto.cast[0]!.thumbUrl).toMatch(new RegExp(`^/api/hls/${LINK_ID}/img/`));
+    expect(dto.cast[1]!.thumbUrl).toBeNull();
     // Path must never leak in the URL.
     expect(dto.posterUrl).not.toContain('/library/metadata');
   });
@@ -99,7 +99,7 @@ describe('buildPlayerMetadata', () => {
     });
     expect(dto.summary).toBe('TMDB overview');
     expect(dto.genres).toEqual(['Science Fiction', 'Thriller']);
-    expect(dto.cast[0].name).toBe('Harrison Ford');
+    expect(dto.cast[0]!.name).toBe('Harrison Ford');
     expect(dto.posterUrl).toBe('https://img.example/poster.jpg');
     expect(dto.backdropUrl).toBe('https://img.example/backdrop.jpg');
     expect(dto.tagline).toContain('Man has made his match');
@@ -146,6 +146,6 @@ describe('buildPlayerMetadata', () => {
         cast: [{ name: 'Someone Else', character: 'x', profilePath: null }],
       }),
     });
-    expect(dto.cast[0].name).toBe('Harrison Ford');
+    expect(dto.cast[0]!.name).toBe('Harrison Ford');
   });
 });
