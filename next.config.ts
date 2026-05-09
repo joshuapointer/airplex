@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   serverExternalPackages: ['better-sqlite3'],
+  images: { unoptimized: true },
   async headers() {
     const shareHeaders = [
       { key: 'Referrer-Policy', value: 'no-referrer' },
