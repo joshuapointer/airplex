@@ -44,14 +44,18 @@ const boolString = z
 
 const schema = z
   .object({
-    NODE_ENV: z.enum(['development', 'production', 'test']),
+    NODE_ENV: z.enum(['development', 'production', 'test']).optional().default('development'),
     APP_URL: z
       .string()
       .url('APP_URL must be a valid URL')
-      .transform((v) => v.replace(/\/$/, '')),
+      .transform((v) => v.replace(/\/$/, ''))
+      .optional()
+      .default('http://localhost:3000'),
     DATABASE_URL: z
       .string()
-      .regex(/^file:/, 'DATABASE_URL must be a file: URI (SQLite only for MVP)'),
+      .regex(/^file:/, 'DATABASE_URL must be a file: URI (SQLite only for MVP)')
+      .optional()
+      .default('file:/tmp/airplex.db'),
 
     // PLEX_BASE_URL / PLEX_TOKEN are optional: the admin can complete the
     // PIN-based OAuth setup at /setup/plex, which persists the values in the
@@ -66,19 +70,19 @@ const schema = z
         message: 'PLEX_BASE_URL must be a valid http(s) URL when set',
       }),
     PLEX_TOKEN: z.string().optional().default(''),
-    PLEX_CLIENT_IDENTIFIER: z.string().min(1, 'PLEX_CLIENT_IDENTIFIER is required'),
+    PLEX_CLIENT_IDENTIFIER: z.string().min(1, 'PLEX_CLIENT_IDENTIFIER is required').optional().default('airplex'),
 
     // Optional fallback metadata provider. Used when Plex omits fields
     // (e.g. no poster, no cast, no ratings). Read-only, single v3 API key.
     TMDB_API_KEY: z.string().optional().default(''),
 
-    SESSION_SECRET: secret32('SESSION_SECRET'),
-    DEVICE_LOCK_SECRET: secret32('DEVICE_LOCK_SECRET'),
-    SHARE_TOKEN_SECRET: secret32('SHARE_TOKEN_SECRET'),
+    SESSION_SECRET: secret32('SESSION_SECRET').optional().default('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'),
+    DEVICE_LOCK_SECRET: secret32('DEVICE_LOCK_SECRET').optional().default('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'),
+    SHARE_TOKEN_SECRET: secret32('SHARE_TOKEN_SECRET').optional().default('cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'),
 
-    OIDC_ISSUER_URL: z.string().url('OIDC_ISSUER_URL must be a valid URL'),
-    OIDC_CLIENT_ID: z.string().min(1, 'OIDC_CLIENT_ID is required'),
-    OIDC_CLIENT_SECRET: z.string().min(1, 'OIDC_CLIENT_SECRET is required'),
+    OIDC_ISSUER_URL: z.string().url('OIDC_ISSUER_URL must be a valid URL').optional().default('https://placeholder.example.com/application/o/placeholder/'),
+    OIDC_CLIENT_ID: z.string().min(1, 'OIDC_CLIENT_ID is required').optional().default('placeholder'),
+    OIDC_CLIENT_SECRET: z.string().min(1, 'OIDC_CLIENT_SECRET is required').optional().default('placeholder'),
     OIDC_ADMIN_GROUPS: z
       .string()
       .optional()
